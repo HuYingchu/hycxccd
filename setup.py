@@ -228,7 +228,7 @@ NAME = "pyxccd"
 # VERSION = parse_version(VERSION_PATH)
 VERSION = setuptools_scm.get_version(
     relative_to=__file__,
-    version_file = "src/python/pyxccd/_version.py",
+    version_file = "_version.py",
     local_scheme="no-local-version", # for PEP 440 compatibility, otherwise TestPyPI fails
 ) 
 
