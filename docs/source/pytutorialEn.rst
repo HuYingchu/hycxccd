@@ -256,13 +256,11 @@ First Disturbance Map
 Important Notes
 ---------------
 
-::
-
-   For large areas, process tiles in batches to avoid memory overload
-
-   Adjust block size parameters in config_hls.yaml to balance speed and memory usage
-
-   Interrupted processing can be resumed - the script will skip completed blocks
+1. For large areas, process tiles in batches to avoid memory overload
+2. Adjust block size parameters in config_hls.yaml to balance speed and
+   memory usage
+3. Interrupted processing can be resumed - the script will skip
+   completed blocks
 
 Example Output
 --------------
