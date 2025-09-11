@@ -268,3 +268,8 @@ Example Output
 --------------
 
 2019-2024 First Disturbance Map (SCCD)
+
+.. figure:: first_disturb1.png
+   :alt: First Disturbance Map
+
+   First Disturbance Map

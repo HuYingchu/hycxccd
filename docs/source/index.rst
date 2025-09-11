@@ -17,6 +17,7 @@ Welcome to pyxccd's documentation!
    intro
    installation
    pytutorialEn
+   pytutorialCh
    Pyxccd API reference <api/pyxccd.rst>
 
 
