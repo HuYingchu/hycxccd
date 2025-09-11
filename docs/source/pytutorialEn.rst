@@ -8,12 +8,12 @@ first disturbance maps. The workflow consists of three main steps.
 Preparation
 -----------
 
-1. Install Required Python Libraries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1. Install Pyxccd
+~~~~~~~~~~~~~~~~~
 
 ::
 
-   pip install numpy pandas click rasterio pyxccd scipy...
+   pip install pyxccd
 
 2. Data Directory Structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,7 +25,7 @@ contains 6 years of HLS data from 2019-2024):
 
    HLS_root_directory/
    └── Tile_ID (e.g., 51RTP)/
-   └── HLS_image_files (e.g., HLS.S30.T51RTP.2021001.v2.0.B02.tif)
+       └── HLS_image_files (e.g., HLS.S30.T51RTP.2021001.v2.0.B02.tif)
 
 3. Configuration File
 ~~~~~~~~~~~~~~~~~~~~~
