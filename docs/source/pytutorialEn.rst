@@ -230,28 +230,22 @@ Interpretation
 Annual Disturbance Maps
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-::
-
-   Pixel value = disturbance_type × 1000 + day_of_year
-   Disturbance types:
-     1 - Vegetation disturbance
-     2 - Non-vegetation disturbance
+| Pixel value = disturbance_type × 1000 + day_of_year
+| Disturbance types:
+|   1 - Vegetation disturbance
+|   2 - Non-vegetation disturbance
 
 Recent Disturbance Map
 ^^^^^^^^^^^^^^^^^^^^^^
 
-::
-
-   Shows the most recent disturbance year for each pixel
-   0 indicates no disturbance
+| Shows the most recent disturbance year for each pixel
+| 0 indicates no disturbance
 
 First Disturbance Map
 ^^^^^^^^^^^^^^^^^^^^^
 
-::
-
-   Shows the first disturbance year for each pixel
-   0 indicates no disturbance
+| Shows the first disturbance year for each pixel
+| 0 indicates no disturbance
 
 Important Notes
 ---------------
