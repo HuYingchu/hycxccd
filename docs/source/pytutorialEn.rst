@@ -15,11 +15,14 @@ Preparation
 
    pip install pyxccd
 
-2. Data Directory Structure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2. Prepare HLS images
+~~~~~~~~~~~~~~~~~~~~~
 
-Prepare downloaded HLS files with the following structure (example
-contains 6 years of HLS data from 2019-2024):
+| Prepare downloaded HLS files with the following structure (example
+  contains 6 years of HLS data from 2019-2024):
+| Quark Drive download link:
+  https://pan.quark.cn/s/f6456bf1ad27?pwd=FxtU
+| Extraction code: FxtU
 
 ::
 
