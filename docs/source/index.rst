@@ -18,6 +18,7 @@ Welcome to pyxccd's documentation!
    installation
    pytutorialEn
    pytutorialCh
+   1_breakdetection_fire_hls
    Pyxccd API reference <api/pyxccd.rst>
 
 
