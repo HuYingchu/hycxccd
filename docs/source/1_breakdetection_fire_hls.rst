@@ -92,13 +92,13 @@ temporal segments of the input data defined by the break. After running
 ``cold_detect``, the output is a 1-d structural array. The length of the
 array denotes the number of the segments for this pixel (for this case,
 we got two segments and one break). Each element include 10 attributes
-as the following: \* t_start: Ordinal date when series model gets
-started \* t_end: Ordinal date when series model gets ended \* t_break:
-Ordinal date when the break is detected (the observation next to t_end)
-\* pos: Location of each time series model (i \* n_row + j), e.g., the
-pos of (1000, 1) is 5000\ *1000+1* num_obs: Number of clear observations
-used for model estimation \* category: Quality of the model estimation
-(what model is used, what process is used)
+as the following: 
+- t_start: Ordinal date when series model gets started
+- t_end: Ordinal date when series model gets ended
+- t_break: Ordinal date when the break is detected (the observation next to t_end)
+- pos: Location of each time series model (i * n_row + j), e.g., the pos of (1000, 1) is 5000 * 1000+1
+- num_obs: Number of clear observations used for model estimation
+- category: Quality of the model estimation (what model is used, what process is used)
 
 ::
 
@@ -466,16 +466,33 @@ The below is using S-CCD for the Ya’an fire site
 
 
 
-S-CCD and COLD both detects the disturbance as ‘2024-03-23’. The output
-of S-CCD is a structured object containing six elements. \| Element \|
-Datatype \| Description \| \| :——- \| :——: \| ——-: \| \| position \| int
-\| Position of current pixel \| \| rec_cg \| ndarray \| Historical
-temporal segment obtained by break detection \| \| nrt_mode \| int \|
-Current status of this pixel \| \| nrt_model \| ndarray \| Near
-real-time model for recursive update \| \| nrt_queue \| ndarray \| Near
-real-time observations (when nrt model is not initialized) \| \|
-min_rmse \| ndarray \| Minimum rmse in CCDC to avoid overdetection from
-black body \|
+S-CCD and COLD both detects the disturbance as '2024-03-23'. The output of S-CCD is a structured object containing six elements.
+
+.. list-table:: S-CCD Output Structure
+   :header-rows: 1
+   :widths: 20 15 65
+
+   * - Element
+     - Datatype
+     - Description
+   * - position
+     - int
+     - Position of current pixel
+   * - rec_cg
+     - ndarray
+     - Historical temporal segment obtained by break detection
+   * - nrt_mode
+     - int
+     - Current status of this pixel
+   * - nrt_model
+     - ndarray
+     - Near real-time model for recursive update
+   * - nrt_queue
+     - ndarray
+     - Near real-time observations (when nrt model is not initialized)
+   * - min_rmse
+     - ndarray
+     - Minimum rmse in CCDC to avoid overdetection from black body
 
 Among them, ``rec_cg`` stores the results of historical segments
 identified through break detection. A key distinction from the COLD
