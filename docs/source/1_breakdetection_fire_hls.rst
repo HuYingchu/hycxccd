@@ -101,22 +101,22 @@ as the following:
 - num_obs: Number of clear observations used for model estimation
 - category: Quality of the model estimation (what model is used, what process is used)
 
-::
+    ::
 
-   (first digit)
-   0 - normal model (no change);
-   1 - change at the beginning of time series model;
-   2 - change at the end of time series model;
-   3 - disturbance change in the middle;
-   4 - fmask fail scenario;
-   5 - permanent snow scenario;
-   6 - outside user mask
+       (first digit)
+       0 - normal model (no change);
+       1 - change at the beginning of time series model;
+       2 - change at the end of time series model;
+       3 - disturbance change in the middle;
+       4 - fmask fail scenario;
+       5 - permanent snow scenario;
+       6 - outside user mask
 
-   (second digit)
-   1 - model has only constant term;
-   4 - model has 3 coefs + 1 const;
-   6 - model has 5 coefs + 1 const;
-   8 - model has 7 coefs + 1 const;
+       (second digit)
+       1 - model has only constant term;
+       4 - model has 3 coefs + 1 const;
+       6 - model has 5 coefs + 1 const;
+       8 - model has 7 coefs + 1 const;
 
 - change_prob: Probability of a pixel that have undergone change
   (between 0 and 100)
