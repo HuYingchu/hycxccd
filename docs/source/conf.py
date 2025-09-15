@@ -215,7 +215,8 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # documentation.
 #
 html_theme_options = {
-    "collapse_navigation": False,
+    "collapse_navigation": True,# 启用折叠
+    "navigation_depth": 4,# 支持多级嵌套
     "display_version": True,
     # 'logo_only': True,
 }
