@@ -337,7 +337,7 @@ fitting and break detection):
 
 
 
-.. image:: 1_breakdetection_fire_hls_files%5C1_breakdetection_fire_hls_6_0.png
+.. image:: 1_breakdetection_fire_hls_files/1_breakdetection_fire_hls_6_0.png
 
 
 .. code:: ipython3
@@ -352,7 +352,7 @@ fitting and break detection):
 
 
 
-.. image:: 1_breakdetection_fire_hls_files%5C1_breakdetection_fire_hls_7_0.png
+.. image:: 1_breakdetection_fire_hls_files/1_breakdetection_fire_hls_7_0.png
 
 
 (2) S-CCD
@@ -698,7 +698,7 @@ S-CCD.
 
 
 
-.. image:: 1_breakdetection_fire_hls_files%5C1_breakdetection_fire_hls_11_0.png
+.. image:: 1_breakdetection_fire_hls_files/1_breakdetection_fire_hls_11_0.png
 
 
 From the results, S-CCD yields very similar results as the COLD. For the
