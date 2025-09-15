@@ -93,6 +93,7 @@ temporal segments of the input data defined by the break. After running
 array denotes the number of the segments for this pixel (for this case,
 we got two segments and one break). Each element include 10 attributes
 as the following: 
+
 - t_start: Ordinal date when series model gets started
 - t_end: Ordinal date when series model gets ended
 - t_break: Ordinal date when the break is detected (the observation next to t_end)
