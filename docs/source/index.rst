@@ -16,17 +16,12 @@ Welcome to pyxccd's documentation!
 
    intro
    installation
+   tutorial_en
 
 .. toctree::
    :maxdepth: 2
-   :caption: Pyxccd Tutorial(English)
-   
-   1_breakdetection_fire_hls
-   pytutorialEn
+   :caption: Pyxccd 教程(Chinese)
 
-.. toctree::
-   :maxdepth: 2
-   :caption: pytutorialCh
    pytutorialCh
 
 .. toctree::

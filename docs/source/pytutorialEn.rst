@@ -1,4 +1,4 @@
-Pyxccd Tutorial
+Lesson 4:detailed steps for detecting disturbance studies using HLS datasets
 ===============
 
 This tutorial will guide you through processing HLS imagery data using
