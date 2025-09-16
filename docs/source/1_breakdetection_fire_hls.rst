@@ -25,15 +25,15 @@ recording multiple breakpoints per pixel, COLD/CCDC supports monitoring
 of historical changes, such as forest disturbances, urban expansion,
 agricultural rotation, or vegetation recovery.
 
-References:
+*References:*
 
-Zhu, Z., Zhang, J., Yang, Z., Aljaddani, A. H., Cohen, W. B., Qiu, S., &
+*Zhu, Z., Zhang, J., Yang, Z., Aljaddani, A. H., Cohen, W. B., Qiu, S., &
 Zhou, C. (2020). Continuous monitoring of land disturbance based on
-Landsat time series. Remote Sensing of Environment, 238, 111116.
+Landsat time series. Remote Sensing of Environment, 238, 111116.*
 
-Zhu, Z., & Woodcock, C. E. (2014). Continuous change detection and
+*Zhu, Z., & Woodcock, C. E. (2014). Continuous change detection and
 classification of land cover using all available Landsat data. Remote
-sensing of Environment, 144, 152-171.
+sensing of Environment, 144, 152-171.*
 
 --------------
 
@@ -69,21 +69,27 @@ Fire:
     print(f"The break detected is {break_date}")
     cold_result
 
-Output result：
+Output result:
 
-.. rst-class:: highlight
+.. raw:: html
 
-::
+    <style>
+    /* ID选择器优先级最高 */
+    #unique-output-block {
+        background: #F3E5F5 !important;
+    }
+    </style>
+
+.. code:: text
+    :class: output-block
+
 
     The break detected is 2024-03-23
-
-.. rst-class:: highlight
-
-::
-
     array([(735600, 738960, 738968, 1, 472,  8, 100, [[ 1.6766739e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 3.6711215e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 3.5981775e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-1.8439887e+04,  2.7444632e+02,  0.0000000e+00,  0.0000000e+00,  2.4501804e+01, -2.7643259e+01,  6.1835299e+00, -1.1128180e+01], [ 1.2269283e+03,  0.0000000e+00,  0.0000000e+00,  9.2912989e+00,  0.0000000e+00, -1.4118568e+01,  0.0000000e+00, -5.2788010e+00], [ 7.1484528e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00]], [ 32.981544,  46.93689 ,  51.279877, 134.50009 , 138.7891  ,  92.00378 ,   0.      ], [ 220.33261,  170.38785,  256.18225, -920.6151 ,  158.78595,  771.6547 ,    0.     ]),
-           (738968, 739252,      0, 1,  46, 24,   0, [[ 4.3974188e+02,  0.0000000e+00,  7.6601973e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-6.6828550e+03,  9.8554466e+01,  3.9433846e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 7.4310809e+02,  0.0000000e+00,  6.7782188e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-1.9364056e+05,  2.6346836e+03,  5.6232704e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6937788e+03,  0.0000000e+00,  1.1827483e+02,  5.3090653e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6231411e+03,  0.0000000e+00,  1.3118753e+02,  7.0458405e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00]], [ 70.27479 ,  64.3015  ,  71.30929 ,  87.261406, 123.548836, 113.304276,   0.      ], [   0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ])],
-          dtype=[('t_start', '<i4'), ('t_end', '<i4'), ('t_break', '<i4'), ('pos', '<i4'), ('num_obs', '<i4'), ('category', '<i2'), ('change_prob', '<i2'), ('coefs', '<f4', (7, 8)), ('rmse', '<f4', (7,)), ('magnitude', '<f4', (7,))])
+        (738968, 739252,      0, 1,  46, 24,   0, [[ 4.3974188e+02,  0.0000000e+00,  7.6601973e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-6.6828550e+03,  9.8554466e+01,  3.9433846e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 7.4310809e+02,  0.0000000e+00,  6.7782188e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-1.9364056e+05,  2.6346836e+03,  5.6232704e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6937788e+03,  0.0000000e+00,  1.1827483e+02,  5.3090653e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6231411e+03,  0.0000000e+00,  1.3118753e+02,  7.0458405e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00]], [ 70.27479 ,  64.3015  ,  71.30929 ,  87.261406, 123.548836, 113.304276,   0.      ], [   0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ])],
+        dtype=[('t_start', '<i4'), ('t_end', '<i4'), ('t_break', '<i4'), ('pos', '<i4'), ('num_obs', '<i4'), ('category', '<i2'), ('change_prob', '<i2'), ('coefs', '<f4', (7, 8)), ('rmse', '<f4', (7,)), ('magnitude', '<f4', (7,))])
+
+
 
 
 
@@ -380,12 +386,12 @@ seasonality and general trend in addition to break detection. For the
 scenario of retrospective time-series analysis, S-CCD has comparable
 detection accuracy with COLD.
 
-Reference:
+*Reference:*
 
-Ye, S., Rogan, J., Zhu, Z., & Eastman, J. R. (2021). A near-real-time
+*Ye, S., Rogan, J., Zhu, Z., & Eastman, J. R. (2021). A near-real-time
 approach for monitoring forest disturbance using Landsat time series:
 Stochastic continuous change detection. Remote Sensing of Environment,
-252, 112167.
+252, 112167.*
 
 --------------
 

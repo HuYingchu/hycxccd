@@ -1,41 +1,11 @@
-/* ========== 强制覆盖 sphinx_rtd_theme 的样式 ========== */
-.wy-nav-content div.highlight {
-    background: #f8f8f8 !important;
-    margin: 1em 0 !important;
+/* 最高优先级覆盖输出块 */
+.wy-nav-content div.highlight.output-block pre {
+    background-color: #F3E5F5 !important;
+    margin: 0 !important;
+    padding: 0.5em !important;
 }
 
-/* 代码输入块样式 */
-.wy-nav-content div[class^='highlight-']:not(.rst-class-highlight) {
-    background: #FFF3E0 !important;  /* 浅橙色背景 */
-    border-left: 5px solid #FF5722 !important; /* 橙色边框 */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-}
-
-/* 代码输出块样式 */
-.wy-nav-content div.highlight-rst-class-highlight {
-    background: #F3E5F5 !important;  /* 浅紫色背景 */
-    border-left: 5px solid #7B1FA2 !important; /* 紫色边框 */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    position: relative !important;
-}
-
-/* 输出文本样式 */
-.wy-nav-content div.highlight-rst-class-highlight pre {
-    color: #4A148C !important; /* 深紫色文字 */
-    font-weight: bold !important;
-}
-
-/* 添加浮动标签 */
-.wy-nav-content div.highlight-rst-class-highlight::before {
-    content: "OUTPUT";
-    position: absolute;
-    top: -12px;
-    right: 20px;
-    background: #7B1FA2;
-    color: white;
-    padding: 2px 10px;
-    font-size: 0.7em;
-    border-radius: 4px;
-    font-weight: bold;
-    z-index: 1;
+/* 保留输入块原样式 */
+.wy-nav-content div.highlight:not(.output-block) pre {
+    background-color: inherit !important;
 }

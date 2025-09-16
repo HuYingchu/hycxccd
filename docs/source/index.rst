@@ -17,16 +17,7 @@ Welcome to pyxccd's documentation!
    intro
    installation
    tutorial_en
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Pyxccd 教程(Chinese)
-
-   pytutorialCh
-
-.. toctree::
-   :maxdepth: 1
-
+   tutorial_ch
    Pyxccd API reference <api/pyxccd.rst>
 
 
