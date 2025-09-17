@@ -74,17 +74,32 @@ Output result:
 .. raw:: html
 
     <style>
-    /* ID选择器优先级最高 */
-    #unique-output-block {
-        background: #F3E5F5 !important;
+    /* 精准覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          /* 移除 pre 的默认外边距 */
+        border-radius: 0 !important;
+    }
+    /* 新增：为 output-block 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  /* 调整此值控制间距大小 */
     }
     </style>
+
 
 .. code:: text
     :class: output-block
 
-
     The break detected is 2024-03-23
+
+.. code:: text
+    :class: output-block
+
     array([(735600, 738960, 738968, 1, 472,  8, 100, [[ 1.6766739e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 3.6711215e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 3.5981775e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-1.8439887e+04,  2.7444632e+02,  0.0000000e+00,  0.0000000e+00,  2.4501804e+01, -2.7643259e+01,  6.1835299e+00, -1.1128180e+01], [ 1.2269283e+03,  0.0000000e+00,  0.0000000e+00,  9.2912989e+00,  0.0000000e+00, -1.4118568e+01,  0.0000000e+00, -5.2788010e+00], [ 7.1484528e+02,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00]], [ 32.981544,  46.93689 ,  51.279877, 134.50009 , 138.7891  ,  92.00378 ,   0.      ], [ 220.33261,  170.38785,  256.18225, -920.6151 ,  158.78595,  771.6547 ,    0.     ]),
         (738968, 739252,      0, 1,  46, 24,   0, [[ 4.3974188e+02,  0.0000000e+00,  7.6601973e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-6.6828550e+03,  9.8554466e+01,  3.9433846e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 7.4310809e+02,  0.0000000e+00,  6.7782188e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [-1.9364056e+05,  2.6346836e+03,  5.6232704e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6937788e+03,  0.0000000e+00,  1.1827483e+02,  5.3090653e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 1.6231411e+03,  0.0000000e+00,  1.3118753e+02,  7.0458405e+01,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00], [ 0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00,  0.0000000e+00]], [ 70.27479 ,  64.3015  ,  71.30929 ,  87.261406, 123.548836, 113.304276,   0.      ], [   0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ,    0.     ])],
         dtype=[('t_start', '<i4'), ('t_end', '<i4'), ('t_break', '<i4'), ('pos', '<i4'), ('num_obs', '<i4'), ('category', '<i2'), ('change_prob', '<i2'), ('coefs', '<f4', (7, 8)), ('rmse', '<f4', (7,)), ('magnitude', '<f4', (7,))])
@@ -397,7 +412,7 @@ Stochastic continuous change detection. Remote Sensing of Environment,
 
 The below is using S-CCD for the Ya’an fire site
 
-.. code:: ipython3
+.. code:: python
 
     from pyxccd import sccd_detect
     
@@ -409,7 +424,10 @@ The below is using S-CCD for the Ya’an fire site
     sccd_result
 
 
-.. parsed-literal::
+输出结果:
+
+.. code-block:: text
+    :class: output-block
 
     The break detected is 2024-03-23
     
@@ -475,31 +493,24 @@ The below is using S-CCD for the Ya’an fire site
 
 S-CCD and COLD both detects the disturbance as '2024-03-23'. The output of S-CCD is a structured object containing six elements.
 
-.. list-table:: S-CCD Output Structure
-   :header-rows: 1
-   :widths: 20 15 65
+.. raw:: html
 
-   * - Element
-     - Datatype
-     - Description
-   * - position
-     - int
-     - Position of current pixel
-   * - rec_cg
-     - ndarray
-     - Historical temporal segment obtained by break detection
-   * - nrt_mode
-     - int
-     - Current status of this pixel
-   * - nrt_model
-     - ndarray
-     - Near real-time model for recursive update
-   * - nrt_queue
-     - ndarray
-     - Near real-time observations (when nrt model is not initialized)
-   * - min_rmse
-     - ndarray
-     - Minimum rmse in CCDC to avoid overdetection from black body
+    <style>
+        .wy-table-caption, .rst-content table caption {
+            font-style: normal !important;
+        }
+    </style>
+
+.. csv-table:: S-CCD Output Structure
+   :header: "Element", "Datatype", "Description"
+   :widths: 20, 15, 65
+
+   position, int, Position of current pixel
+   rec_cg, ndarray, Historical temporal segment obtained by break detection
+   nrt_mode, int, Current status of this pixel
+   nrt_model, ndarray, Near real-time model for recursive update
+   nrt_queue, ndarray, Near real-time observations (when nrt model is not initialized)
+   min_rmse, ndarray, Minimum rmse in CCDC to avoid overdetection from black body
 
 Among them, ``rec_cg`` stores the results of historical segments
 identified through break detection. A key distinction from the COLD
