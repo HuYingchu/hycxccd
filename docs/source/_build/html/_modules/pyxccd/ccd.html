@@ -1,0 +1,1211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyxccd.ccd &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+
+  
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyxccd.ccd</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyxccd.ccd</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">._ccd_cython</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_sccd_update</span><span class="p">,</span>
+    <span class="n">_sccd_detect</span><span class="p">,</span>
+    <span class="n">_obcold_reconstruct</span><span class="p">,</span>
+    <span class="n">_cold_detect</span><span class="p">,</span>
+    <span class="n">_cold_detect_flex</span><span class="p">,</span>
+    <span class="n">_sccd_detect_flex</span><span class="p">,</span>
+    <span class="n">_sccd_update_flex</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span><span class="p">,</span> <span class="n">rec_cg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._param_validation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">validate_parameter_constraints</span><span class="p">,</span>
+    <span class="n">Integral</span><span class="p">,</span>
+    <span class="n">Interval</span><span class="p">,</span>
+    <span class="n">Real</span><span class="p">,</span>
+    <span class="n">check_consistent_length</span><span class="p">,</span>
+    <span class="n">check_1d</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_sccd_cm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaults</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">chi2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">DEFAULT_ANOMALY_CONSE</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DEFAULT_PRED_TCG</span> <span class="o">=</span> <span class="mf">9.236</span>
+
+<span class="n">_parameter_constraints</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;t_cg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;p_cg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;starting_date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;n_cm&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;conse&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;output_cm&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;boolean&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;gap_days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;output_anomaly&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;boolean&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;anomaly_pcg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;anomaly_conse&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;sccd_conse&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;predictability_pcg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;dist_conse&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;t_cg_scale100&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;t_cg_singleband&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;t_angle&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Integral</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;neither&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;transform_mode&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;boolean&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;state_intervaldays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Interval</span><span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;trimodal&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;boolean&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">NUM_FC</span> <span class="o">=</span> <span class="mi">40</span>  <span class="c1"># define the maximum number of outputted curves</span>
+<span class="n">NUM_FC_SCCD</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">NUM_NRT_QUEUE</span> <span class="o">=</span> <span class="mi">240</span>
+<span class="n">MAX_FLEX_BAND</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">MAX_FLEX_BAND_SCCD</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">DEFAULT_BANDS</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate types and values of constructor parameters</span>
+<span class="sd">    The expected type and values must be defined in the `_parameter_constraints`</span>
+<span class="sd">    class attribute, which is a dictionary `param_name: list of constraints`. See</span>
+<span class="sd">    the docstring of `validate_parameter_constraints` for a description of the</span>
+<span class="sd">    accepted constraints.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># params = dict()</span>
+    <span class="c1"># for key in kwargs:</span>
+    <span class="c1">#     dict[key] = kwargs[key]</span>
+
+    <span class="n">validate_parameter_constraints</span><span class="p">(</span>
+        <span class="n">_parameter_constraints</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">caller_name</span><span class="o">=</span><span class="n">func_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_data</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">break_dates</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    validate and forcibly change the data format</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: 1d array of shape(n_obs,), list of ordinal dates</span>
+<span class="sd">    ts_b: 1d array of shape(n_obs,), time series of blue band.</span>
+<span class="sd">    ts_g: 1d array of shape(n_obs,), time series of green band</span>
+<span class="sd">    ts_r: 1d array of shape(n_obs,), time series of red band</span>
+<span class="sd">    ts_n: 1d array of shape(n_obs,), time series of nir band</span>
+<span class="sd">    ts_s1: 1d array of shape(n_obs,), time series of swir1 band</span>
+<span class="sd">    ts_s2: 1d array of shape(n_obs,), time series of swir2 band</span>
+<span class="sd">    ts_t: 1d array of shape(n_obs,), time series of thermal band</span>
+<span class="sd">    qas: 1d array, the QA cfmask bands. &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_consistent_length</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="s2">&quot;dates&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_b</span><span class="p">,</span> <span class="s2">&quot;ts_b&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_g</span><span class="p">,</span> <span class="s2">&quot;ts_g&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_r</span><span class="p">,</span> <span class="s2">&quot;ts_r&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_n</span><span class="p">,</span> <span class="s2">&quot;ts_n&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_s1</span><span class="p">,</span> <span class="s2">&quot;ts_s1&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">ts_s2</span><span class="p">,</span> <span class="s2">&quot;ts_s2&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">qas</span><span class="p">,</span> <span class="s2">&quot;qas&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">break_dates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">check_1d</span><span class="p">(</span><span class="n">break_dates</span><span class="p">,</span> <span class="s2">&quot;break_dates&quot;</span><span class="p">)</span>
+
+    <span class="n">dates</span> <span class="o">=</span> <span class="n">dates</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_b</span> <span class="o">=</span> <span class="n">ts_b</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_g</span> <span class="o">=</span> <span class="n">ts_g</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_r</span> <span class="o">=</span> <span class="n">ts_r</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_n</span> <span class="o">=</span> <span class="n">ts_n</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_s1</span> <span class="o">=</span> <span class="n">ts_s1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_s2</span> <span class="o">=</span> <span class="n">ts_s2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_t</span> <span class="o">=</span> <span class="n">ts_t</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">qas</span> <span class="o">=</span> <span class="n">qas</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">break_dates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">break_dates</span> <span class="o">=</span> <span class="n">break_dates</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">break_dates</span>
+    <span class="k">return</span> <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_data_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_data</span><span class="p">,</span> <span class="n">qas</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    validate and forcibly change the data format</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: 1d array of shape(n_obs,), list of ordinal dates</span>
+<span class="sd">    ts_data: 2d array of shape(n_obs,), time series stack for inputs</span>
+<span class="sd">    qas: 1d array, the QA cfmask bands. &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_consistent_length</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_data</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="s2">&quot;dates&quot;</span><span class="p">)</span>
+    <span class="n">check_1d</span><span class="p">(</span><span class="n">qas</span><span class="p">,</span> <span class="s2">&quot;qas&quot;</span><span class="p">)</span>
+
+    <span class="n">dates</span> <span class="o">=</span> <span class="n">dates</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">ts_data</span> <span class="o">=</span> <span class="n">ts_data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="n">qas</span> <span class="o">=</span> <span class="n">qas</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dates</span><span class="p">,</span> <span class="n">ts_data</span><span class="p">,</span> <span class="n">qas</span>
+
+
+<div class="viewcode-block" id="cold_detect">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.cold_detect">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cold_detect</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_b</span><span class="p">,</span>
+    <span class="n">ts_g</span><span class="p">,</span>
+    <span class="n">ts_r</span><span class="p">,</span>
+    <span class="n">ts_n</span><span class="p">,</span>
+    <span class="n">ts_s1</span><span class="p">,</span>
+    <span class="n">ts_s2</span><span class="p">,</span>
+    <span class="n">ts_t</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">output_cm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">starting_date</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">n_cm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">cm_output_interval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap_days</span><span class="o">=</span><span class="mf">365.25</span><span class="p">,</span>
+    <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;running pixel-based COLD algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_b: numpy.ndarray</span>
+<span class="sd">        1d time series of blue band of shape(n_obs,)</span>
+<span class="sd">    ts_g: numpy.ndarray</span>
+<span class="sd">        1d time series of green band of shape(n_obs,)</span>
+<span class="sd">    ts_r: numpy.ndarray</span>
+<span class="sd">        1d time series of red band of shape(n_obs,)</span>
+<span class="sd">    ts_n: numpy.ndarray</span>
+<span class="sd">        1d time series of nir band of shape(n_obs,)</span>
+<span class="sd">    ts_s1: numpy.ndarray</span>
+<span class="sd">        1d time series of swir1 band of shape(n_obs,)</span>
+<span class="sd">    ts_s2: numpy.ndarray</span>
+<span class="sd">        1d time series of swir2 band of shape(n_obs,)</span>
+<span class="sd">    ts_t: numpy.ndarray</span>
+<span class="sd">        1d time series of thermal band of shape(n_obs,)</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        position id of the pixel, by default 1</span>
+<span class="sd">    output_cm: bool</span>
+<span class="sd">        &#39;True&#39; means outputting change magnitude and change magnitude dates (OB-COLD), i.e., (cold_results, cm_outputs, cm_outputs_date); &#39;False&#39; will output only cold_results</span>
+<span class="sd">    starting_date: int</span>
+<span class="sd">        the starting date of the whole dataset to enable reconstruct CM_date, all pixels for a tile. should have the same date, only for output_cm is True. by default 0.</span>
+<span class="sd">    n_cm: int</span>
+<span class="sd">        length of outputted change magnitude. Only output_cm == &#39;True&#39;. by default 0.</span>
+<span class="sd">    cm_output_interval: int</span>
+<span class="sd">        temporal interval of outputting change magnitudes. Only output_cm == &#39;True&#39;. by default 0.</span>
+<span class="sd">    b_c2: bool</span>
+<span class="sd">        a temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid pixel test due to the current low quality. by default True</span>
+<span class="sd">    gap_days: int</span>
+<span class="sd">        define the day number of the gap year for determining i_dense. The COLD will skip the i_dense days to set the starting point of the model. Setting a large value (e.g., 1500) if the gap year is in the middle of the time range. by default 365.25.</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray | (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+
+<span class="sd">        If  output_cm is False, a structured array of dtype = :py:type:`~pyxccd.common.cold_rec_cg` is returnd;</span>
+<span class="sd">        if output_cm is True, a tuple (cold_results, cm_outputs, cm_outputs_date) will be returned</span>
+
+<span class="sd">            cold_results: numpy.ndarray</span>
+<span class="sd">                A structured array of dtype = :py:type:`~pyxccd.common.cold_rec_cg`</span>
+
+<span class="sd">            cm_outputs: numpy.ndarray</span>
+<span class="sd">                Change magnitude list, shape (n_cm,)</span>
+
+<span class="sd">            cm_outputs_date: numpy.ndarray</span>
+<span class="sd">                Change magnitude date list, shape (n_cm,)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check whether the dates are arranged in ascending order</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_b</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ts_g</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">ts_r</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">ts_n</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">ts_s1</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="n">ts_s2</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+        <span class="n">ts_t</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">8</span><span class="p">]</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;cold_detect&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">output_cm</span><span class="o">=</span><span class="n">output_cm</span><span class="p">,</span>
+        <span class="n">starting_date</span><span class="o">=</span><span class="n">starting_date</span><span class="p">,</span>
+        <span class="n">n_cm</span><span class="o">=</span><span class="n">n_cm</span><span class="p">,</span>
+        <span class="n">cm_output_interval</span><span class="o">=</span><span class="n">cm_output_interval</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">gap_days</span><span class="o">=</span><span class="n">gap_days</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># make sure it is c contiguous array and 64 bit</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span>
+    <span class="p">)</span>
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_cold_detect</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_b</span><span class="p">,</span>
+        <span class="n">ts_g</span><span class="p">,</span>
+        <span class="n">ts_r</span><span class="p">,</span>
+        <span class="n">ts_n</span><span class="p">,</span>
+        <span class="n">ts_s1</span><span class="p">,</span>
+        <span class="n">ts_s2</span><span class="p">,</span>
+        <span class="n">ts_t</span><span class="p">,</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">output_cm</span><span class="p">,</span>
+        <span class="n">starting_date</span><span class="p">,</span>
+        <span class="n">n_cm</span><span class="p">,</span>
+        <span class="n">cm_output_interval</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">gap_days</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="obcold_reconstruct">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.obcold_reconstruct">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">obcold_reconstruct</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_b</span><span class="p">,</span>
+    <span class="n">ts_g</span><span class="p">,</span>
+    <span class="n">ts_r</span><span class="p">,</span>
+    <span class="n">ts_n</span><span class="p">,</span>
+    <span class="n">ts_s1</span><span class="p">,</span>
+    <span class="n">ts_s2</span><span class="p">,</span>
+    <span class="n">ts_t</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">break_dates</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;re-contructructing change records using break dates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_b: numpy.ndarray</span>
+<span class="sd">        1d time series of blue band of shape(n_obs,)</span>
+<span class="sd">    ts_g: numpy.ndarray</span>
+<span class="sd">        1d time series of green band of shape(n_obs,)</span>
+<span class="sd">    ts_r: numpy.ndarray</span>
+<span class="sd">        1d time series of red band of shape(n_obs,)</span>
+<span class="sd">    ts_n: numpy.ndarray</span>
+<span class="sd">        1d time series of nir band of shape(n_obs,)</span>
+<span class="sd">    ts_s1: numpy.ndarray</span>
+<span class="sd">        1d time series of swir1 band of shape(n_obs,)</span>
+<span class="sd">    ts_s2: numpy.ndarray</span>
+<span class="sd">        1d time series of swir2 band of shape(n_obs,)</span>
+<span class="sd">    ts_t: numpy.ndarray</span>
+<span class="sd">        1d time series of thermal band of shape(n_obs,)</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    break_dates: numpy.ndarray</span>
+<span class="sd">        1d time series of break dates obtained from other procedures such as obia</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        position id of the pixel, by default 1</span>
+<span class="sd">    b_c2: bool</span>
+<span class="sd">        a temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid pixel test due to the current low quality. by default True</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+
+<span class="sd">        cold_results: numpy.ndarray</span>
+<span class="sd">            A structured array of dtype = :py:type:`~pyxccd.common.cold_rec_cg`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_validate_params</span><span class="p">(</span><span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;obcold_construct&quot;</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span> <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">)</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">break_dates</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">_validate_data</span><span class="p">(</span>
+            <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">break_dates</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_obcold_reconstruct</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_b</span><span class="p">,</span>
+        <span class="n">ts_g</span><span class="p">,</span>
+        <span class="n">ts_r</span><span class="p">,</span>
+        <span class="n">ts_n</span><span class="p">,</span>
+        <span class="n">ts_s1</span><span class="p">,</span>
+        <span class="n">ts_s2</span><span class="p">,</span>
+        <span class="n">ts_t</span><span class="p">,</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">break_dates</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sccd_detect">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.sccd_detect">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccd_detect</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_b</span><span class="p">,</span>
+    <span class="n">ts_g</span><span class="p">,</span>
+    <span class="n">ts_r</span><span class="p">,</span>
+    <span class="n">ts_n</span><span class="p">,</span>
+    <span class="n">ts_s1</span><span class="p">,</span>
+    <span class="n">ts_s2</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_anomaly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">anomaly_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">anomaly_conse</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">state_intervaldays</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">fitting_coefs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Offline SCCD algorithm for processing historical time series.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_b: numpy.ndarray</span>
+<span class="sd">        1d time series of blue band of shape(n_obs,)</span>
+<span class="sd">    ts_g: numpy.ndarray</span>
+<span class="sd">        1d time series of green band of shape(n_obs,)</span>
+<span class="sd">    ts_r: numpy.ndarray</span>
+<span class="sd">        1d time series of red band of shape(n_obs,)</span>
+<span class="sd">    ts_n: numpy.ndarray</span>
+<span class="sd">        1d time series of nir band of shape(n_obs,)</span>
+<span class="sd">    ts_s1: numpy.ndarray</span>
+<span class="sd">        1d time series of swir1 band of shape(n_obs,)</span>
+<span class="sd">    ts_s2: numpy.ndarray</span>
+<span class="sd">        1d time series of swir2 band of shape(n_obs,)</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        Probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        Consecutive observation number, by default 6. No more than 8.</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        Position id of the pixel, by default 1</span>
+<span class="sd">    b_c2: bool</span>
+<span class="sd">        A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid</span>
+<span class="sd">        pixel test due to the current low quality. by default True</span>
+<span class="sd">    output_anomaly: bool</span>
+<span class="sd">        If true, output anomaly breaks where a anomaly is an overdetection of break using conse 3 and threshold = anomaly_tcg,</span>
+<span class="sd">        which overdetects anomalies to simulate the situation of NRT scenario and for training a retrospective model, by default False.</span>
+<span class="sd">        Note that anomalys is a type of breaks that do not trigger model initialization, against structural breaks (i.e., normal breaks).</span>
+<span class="sd">    anomaly_pcg: float</span>
+<span class="sd">        Change probability threshold for defining spectral anomalies, by default 0.90.</span>
+<span class="sd">    anomaly_conse: int</span>
+<span class="sd">        Consecutive observation number to determine anomaly identification, by default 3. No more than 8.</span>
+<span class="sd">    state_intervaldays: float</span>
+<span class="sd">        If larger than 0, output states at a day interval of state_intervaldays, by default 0.0 (meaning that no states will be outputted). For more details, refer to state-space models (e.g., http://www.scholarpedia.org/article/State_space_model)</span>
+<span class="sd">    fitting_coefs: bool</span>
+<span class="sd">        If True, use curve fitting to get harmonic coefficients for the temporal segment, otherwise use the local coefficients from kalman filter, by default False.</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :py:type:`~pyxccd.common.SccdOutput` | (:py:type:`~pyxccd.common.SccdOutput`, pd.DataFrame) | (:py:type:`~pyxccd.common.SccdOutput`, numpy.ndarray)</span>
+
+<span class="sd">        If output_anomaly is False and b_output_state is False, sccdoutput will be returned (by default);</span>
+<span class="sd">        if output_anomaly is False and b_output_state is True,  (sccdoutput, states_info) will be returned;</span>
+<span class="sd">        if output_anomaly is True, (sccdoutput, anomalys) will be returned</span>
+
+<span class="sd">            sccdoutput: :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">                A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</span>
+
+<span class="sd">            states_info: pd.DataFrame</span>
+<span class="sd">                A table of three state time series (trend, annual, semiannual) for six inputted spectral bands</span>
+
+<span class="sd">            anomalys: numpy.ndarray</span>
+<span class="sd">                A structured array of dtype = :py:type:`~pyxccd.common.anomaly`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check whether the dates are arranged in ascending order</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">qas</span><span class="p">))</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_b</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ts_g</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">ts_r</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">ts_n</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">ts_s1</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="n">ts_s2</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;sccd_detect&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">sccd_conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="o">=</span><span class="n">output_anomaly</span><span class="p">,</span>
+        <span class="n">anomaly_pcg</span><span class="o">=</span><span class="n">anomaly_pcg</span><span class="p">,</span>
+        <span class="n">anomaly_conse</span><span class="o">=</span><span class="n">anomaly_conse</span><span class="p">,</span>
+        <span class="n">state_intervaldays</span><span class="o">=</span><span class="n">state_intervaldays</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ts_t</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ts_b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># make sure it is c contiguous array and 64 bit</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span>
+    <span class="p">)</span>
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+    <span class="n">anomaly_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">anomaly_pcg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+    <span class="c1"># sccd_wrapper = SccdDetectWrapper()</span>
+    <span class="c1"># tmp = copy.deepcopy(sccd_wrapper.sccd_detect(dates, ts_b, ts_g, ts_r, ts_n, ts_s1, ts_s2, ts_t, qas, t_cg,</span>
+    <span class="c1">#                                 pos, conse, b_c2, output_anomaly, anomaly_tcg, b_monitor_init))</span>
+    <span class="c1"># return tmp</span>
+    <span class="k">if</span> <span class="n">state_intervaldays</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">b_output_state</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">b_output_state</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">_sccd_detect</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_b</span><span class="p">,</span>
+        <span class="n">ts_g</span><span class="p">,</span>
+        <span class="n">ts_r</span><span class="p">,</span>
+        <span class="n">ts_n</span><span class="p">,</span>
+        <span class="n">ts_s1</span><span class="p">,</span>
+        <span class="n">ts_s2</span><span class="p">,</span>
+        <span class="n">ts_t</span><span class="p">,</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="p">,</span>
+        <span class="n">anomaly_tcg</span><span class="p">,</span>
+        <span class="n">anomaly_conse</span><span class="p">,</span>
+        <span class="n">DEFAULT_PRED_TCG</span><span class="p">,</span>
+        <span class="n">b_output_state</span><span class="p">,</span>
+        <span class="n">state_intervaldays</span><span class="p">,</span>
+        <span class="n">fitting_coefs</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sccd_update">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.sccd_update">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccd_update</span><span class="p">(</span>
+    <span class="n">sccd_pack</span><span class="p">,</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_b</span><span class="p">,</span>
+    <span class="n">ts_g</span><span class="p">,</span>
+    <span class="n">ts_r</span><span class="p">,</span>
+    <span class="n">ts_n</span><span class="p">,</span>
+    <span class="n">ts_s1</span><span class="p">,</span>
+    <span class="n">ts_s2</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">anomaly_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">predictability_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SCCD online update for new observations</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sccd_pack: :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">        The SCCD results outputted by the last process</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d new time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_b: numpy.ndarray</span>
+<span class="sd">        1d new time series of blue band of shape(n_obs,)</span>
+<span class="sd">    ts_g: numpy.ndarray</span>
+<span class="sd">        1d new time series of green band of shape(n_obs,)</span>
+<span class="sd">    ts_r: numpy.ndarray</span>
+<span class="sd">        1d new time series of red band of shape(n_obs,)</span>
+<span class="sd">    ts_n: numpy.ndarray</span>
+<span class="sd">        1d new time series of nir band of shape(n_obs,)</span>
+<span class="sd">    ts_s1: numpy.ndarray</span>
+<span class="sd">        1d new time series of swir1 band of shape(n_obs,)</span>
+<span class="sd">    ts_s2: numpy.ndarray</span>
+<span class="sd">        1d new time series of swir2 band of shape(n_obs,)</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d new time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        position id of the pixel, by default 1</span>
+<span class="sd">    anomaly_pcg: float</span>
+<span class="sd">        change probability threshold for defining spectral anomalies, by default 0.90.</span>
+<span class="sd">    predictability_pcg: float</span>
+<span class="sd">        probability threshold for predictability test. If not passed, the nrt_mode will return 11. by default 0.90.</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">        A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if not isinstance(sccd_pack, SccdOutput):</span>
+    <span class="c1">#     raise ValueError(&quot;The type of sccd_pack has to be namedtuple &#39;SccdOutput&#39;!&quot;)</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;sccd_update&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">sccd_conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">anomaly_pcg</span><span class="o">=</span><span class="n">anomaly_pcg</span><span class="p">,</span>
+        <span class="n">predictability_pcg</span><span class="o">=</span><span class="n">predictability_pcg</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">qas</span><span class="p">))</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_b</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ts_g</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">ts_r</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">ts_n</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">ts_s1</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+        <span class="n">ts_s2</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>
+
+    <span class="n">ts_t</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ts_b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span> <span class="n">ts_b</span><span class="p">,</span> <span class="n">ts_g</span><span class="p">,</span> <span class="n">ts_r</span><span class="p">,</span> <span class="n">ts_n</span><span class="p">,</span> <span class="n">ts_s1</span><span class="p">,</span> <span class="n">ts_s2</span><span class="p">,</span> <span class="n">ts_t</span><span class="p">,</span> <span class="n">qas</span>
+    <span class="p">)</span>
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+    <span class="n">anomaly_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">anomaly_pcg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+    <span class="n">predictability_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">predictability_pcg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_sccd_update</span><span class="p">(</span>
+        <span class="n">sccd_pack</span><span class="p">,</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_b</span><span class="p">,</span>
+        <span class="n">ts_g</span><span class="p">,</span>
+        <span class="n">ts_r</span><span class="p">,</span>
+        <span class="n">ts_n</span><span class="p">,</span>
+        <span class="n">ts_s1</span><span class="p">,</span>
+        <span class="n">ts_s2</span><span class="p">,</span>
+        <span class="n">ts_t</span><span class="p">,</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="kc">True</span><span class="p">,</span>
+        <span class="n">anomaly_tcg</span><span class="p">,</span>
+        <span class="n">predictability_tcg</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sccd_identify">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.sccd_identify">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccd_identify</span><span class="p">(</span>
+    <span class="n">sccd_pack</span><span class="p">,</span>
+    <span class="n">dist_conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">t_cg_singleband</span><span class="o">=-</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">t_angle</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span>
+    <span class="n">transform_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    identify disturbance date for the current monitoring model from SccdOutput</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sccd_pack: :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">        S-CCD output</span>
+<span class="sd">    dist_conse: int</span>
+<span class="sd">        Minimum consecutive anomaly number required to identify disturbance, by default 6</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        Change magnitude probability threshold to identify disturbance, by default 0.99</span>
+<span class="sd">    t_cg_singleband: float</span>
+<span class="sd">        single-band change magnitude to identify greenning breaks, by default -200</span>
+<span class="sd">      see Eq. 10 in Zhu, Z., Zhang, J., Yang, Z., Aljaddani, A. H., Cohen, W. B., Qiu, S., &amp; Zhou, C. (2020). Continuous monitoring of land disturbance based on Landsat time series. Remote Sensing of Environment, 238, 111116.</span>
+<span class="sd">    t_angle_scale100: float</span>
+<span class="sd">        Threshold for included angle (scale by 100), by default 45</span>
+<span class="sd">    transform_mode: bool</span>
+<span class="sd">        Transform the mode to untested predictability once the change has been detected. Default isFalse</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        (:py:type:`~pyxccd.common.SccdOutput`, int)</span>
+<span class="sd">            The return date is either 0 (no disturbance) or the ordinal date of disturbance occurrence</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;sccd_identify&quot;</span><span class="p">,</span>
+        <span class="n">dist_conse</span><span class="o">=</span><span class="n">dist_conse</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">t_cg_singleband</span><span class="o">=</span><span class="n">t_cg_singleband</span><span class="p">,</span>
+        <span class="n">t_angle</span><span class="o">=</span><span class="n">t_angle</span><span class="p">,</span>
+        <span class="n">transform_mode</span><span class="o">=</span><span class="n">transform_mode</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">t_cg_scale100</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">DEFAULT_BANDS</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">t_angle_scale100</span> <span class="o">=</span> <span class="n">t_angle</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">==</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;SCCD&quot;</span><span class="p">][</span><span class="s2">&quot;NRT_MONITOR_SNOW&quot;</span><span class="p">]</span>
+        <span class="ow">or</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">==</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;SCCD&quot;</span><span class="p">][</span><span class="s2">&quot;NRT_QUEUE_SNOW&quot;</span><span class="p">]</span>
+        <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">sccd_pack</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;anomaly_conse&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">dist_conse</span>
+        <span class="ow">and</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;norm_cm&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">t_cg_scale100</span>
+        <span class="ow">and</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cm_angle&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">t_angle_scale100</span>
+    <span class="p">):</span>
+        <span class="n">cm_median</span> <span class="o">=</span> <span class="n">calculate_sccd_cm</span><span class="p">(</span><span class="n">sccd_pack</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cm_median</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">t_cg_singleband</span>
+            <span class="ow">and</span> <span class="n">cm_median</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">t_cg_singleband</span>
+            <span class="ow">and</span> <span class="n">cm_median</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">t_cg_singleband</span>
+        <span class="p">):</span>  <span class="c1"># greening</span>
+            <span class="k">return</span> <span class="n">sccd_pack</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">transform_mode</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">==</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;SCCD&quot;</span><span class="p">][</span><span class="s2">&quot;NRT_MONITOR_STANDARD&quot;</span><span class="p">]:</span>
+                    <span class="n">sccd_pack</span> <span class="o">=</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">nrt_mode</span><span class="o">=</span><span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+                <span class="c1"># elif sccd_pack.nrt_mode == defaults[&quot;SCCD&quot;][&quot;NRT_MONITOR2QUEUE&quot;]:</span>
+                <span class="c1">#     sccd_pack = sccd_pack._replace(</span>
+                <span class="c1">#         nrt_mode=defaults[&quot;SCCD&quot;][&quot;NRT_QUEUE_STANDARD&quot;] + 10</span>
+                <span class="c1">#     )</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">sccd_pack</span><span class="p">,</span>
+                <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;obs_date_since1982&quot;</span><span class="p">][</span>
+                    <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;SCCD&quot;</span><span class="p">][</span><span class="s2">&quot;DEFAULT_CONSE&quot;</span><span class="p">]</span>
+                    <span class="o">-</span> <span class="n">sccd_pack</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;anomaly_conse&quot;</span><span class="p">]</span>
+                <span class="p">]</span>
+                <span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;COMMON&quot;</span><span class="p">][</span><span class="s2">&quot;JULIAN_LANDSAT4_LAUNCH&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sccd_pack</span><span class="p">,</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="cold_detect_flex">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.cold_detect_flex">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cold_detect_flex</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_stack</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">output_cm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">starting_date</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">n_cm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">cm_output_interval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">gap_days</span><span class="o">=</span><span class="mf">365.25</span><span class="p">,</span>
+    <span class="n">tmask_b1_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tmask_b2_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;running pixel-based COLD algorithm for any band combination (flexible mode).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_stack: numpy.ndarray</span>
+<span class="sd">        2d array of shape (n_obs, nbands), horizontally stacked multispectral time series.</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        Probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        Consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        position id of the pixel, by default 1</span>
+<span class="sd">    output_cm: bool</span>
+<span class="sd">        &#39;True&#39; means outputting change magnitude and change magnitude dates (OB-COLD), i.e.,</span>
+<span class="sd">        (cold_results, cm_outputs, cm_outputs_date); &#39;False&#39; will output only cold_results</span>
+<span class="sd">    starting_date: int</span>
+<span class="sd">        The starting date of the whole dataset to enable reconstruct CM_date, all pixels for a tile should have the same date, only for output_cm is True. by default 0.</span>
+<span class="sd">    n_cm: int</span>
+<span class="sd">        Length of outputted change magnitude. Only output_cm == &#39;True&#39;. by default 0.</span>
+<span class="sd">    cm_output_interval: int</span>
+<span class="sd">        Temporal interval of outputting change magnitudes. Only output_cm == &#39;True&#39;. by default 0.</span>
+<span class="sd">    gap_days: int</span>
+<span class="sd">        Define the day number of the gap year for determining i_dense. The COLD will skip the i_dense days to set the starting point of the model. Setting a large value (e.g., 1500) if the gap year is in the middle of the time range. by default 365.25.</span>
+<span class="sd">    tmask_b1_index: int</span>
+<span class="sd">        The first band id for tmask. Started from 1. The default CCDC is 2 (green)</span>
+<span class="sd">    tmask_b2_index: int</span>
+<span class="sd">        The second band id for tmask. Started from 1. The default CCDC is 5 (swir1)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray | (numpy.ndarray, numpy.ndarray, numpy.ndarray)</span>
+
+<span class="sd">        If  output_cm is False, a structured array of dtype = :py:type:`~pyxccd.common.cold_rec_cg` is returnd;</span>
+<span class="sd">        if output_cm is True, a tuple (cold_results, cm_outputs, cm_outputs_date) will be returned</span>
+
+<span class="sd">            cold_results: numpy.ndarray</span>
+<span class="sd">                A structured array of dtype = :py:type:`~pyxccd.common.cold_rec_cg`</span>
+
+<span class="sd">            cm_outputs: numpy.ndarray</span>
+<span class="sd">                Change magnitude list, shape (n_cm,)</span>
+
+<span class="sd">            cm_outputs_date: numpy.ndarray</span>
+<span class="sd">                Change magnitude date list, shape (n_cm,)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check whether the dates are arranged in ascending order</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">))</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_stack</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;cold_detect_flex&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">output_cm</span><span class="o">=</span><span class="n">output_cm</span><span class="p">,</span>
+        <span class="n">starting_date</span><span class="o">=</span><span class="n">starting_date</span><span class="p">,</span>
+        <span class="n">n_cm</span><span class="o">=</span><span class="n">n_cm</span><span class="p">,</span>
+        <span class="n">cm_output_interval</span><span class="o">=</span><span class="n">cm_output_interval</span><span class="p">,</span>
+        <span class="n">gap_days</span><span class="o">=</span><span class="n">gap_days</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># make sure it is c contiguous array and 64 bit</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+    <span class="n">valid_num_scenes</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nbands</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">nbands</span> <span class="o">&gt;</span> <span class="n">MAX_FLEX_BAND</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t input more than </span><span class="si">{</span><span class="n">MAX_FLEX_BAND</span><span class="si">}</span><span class="s2"> bands (</span><span class="si">{</span><span class="n">nbands</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">MAX_FLEX_BAND</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">tmask_b1_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tmask_b2_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;tmask_b1_index or tmask_b2_index is larger than the input band number&quot;</span>
+        <span class="p">)</span>
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">max_t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.99999</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">rec_cg</span> <span class="o">=</span> <span class="n">_cold_detect_flex</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_stack</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">valid_num_scenes</span><span class="p">,</span>
+        <span class="n">nbands</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">max_t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">output_cm</span><span class="p">,</span>
+        <span class="n">starting_date</span><span class="p">,</span>
+        <span class="n">n_cm</span><span class="p">,</span>
+        <span class="n">cm_output_interval</span><span class="p">,</span>
+        <span class="n">gap_days</span><span class="p">,</span>
+        <span class="n">tmask_b1_index</span><span class="p">,</span>
+        <span class="n">tmask_b2_index</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># dt = numpy.dtype([(&#39;t_start&#39;, numpy.int32), (&#39;t_end&#39;, numpy.int32), (&#39;t_break&#39;, numpy.int32), (&#39;pos&#39;, numpy.int32),</span>
+    <span class="c1">#                (&#39;nm_obs&#39;, numpy.int32), (&#39;category&#39;, numpy.int16), (&#39;change_prob&#39;, numpy.int16), (&#39;change_prob&#39;, numpy.int16)])</span>
+    <span class="k">return</span> <span class="n">rec_cg</span></div>
+
+
+
+<div class="viewcode-block" id="sccd_detect_flex">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.sccd_detect_flex">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccd_detect_flex</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_stack</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_anomaly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">anomaly_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">anomaly_conse</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">state_intervaldays</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">tmask_b1_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tmask_b2_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">fitting_coefs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">trimodal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Offline SCCD algorithm for processing historical time series for any band combination.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_stack: numpy.ndarray</span>
+<span class="sd">        2d array of shape (n_obs, nbands), horizontally stacked multispectral time series. The maximum band number is 10..</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        Probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        Consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        Position id of the pixel, by default 1</span>
+<span class="sd">    b_c2: bool</span>
+<span class="sd">        A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid</span>
+<span class="sd">        pixel test due to the current low quality. by default True</span>
+<span class="sd">    output_anomaly: bool</span>
+<span class="sd">        If true, output anomaly breaks where a anomaly is an overdetection of break using conse 3 and threshold = anomaly_tcg, which overdetects anomalies to simulate the situation of NRT scenario and for training a retrospective model, by default False.</span>
+<span class="sd">        Note that anomalys is a type of breaks that do not trigger model initialization, against structural breaks (i.e., normal breaks).</span>
+<span class="sd">    anomaly_pcg: float</span>
+<span class="sd">        Change probability threshold for defining spectral anomalies anomalys, by default 0.90.</span>
+<span class="sd">    anomaly_conse: int</span>
+<span class="sd">        Consecutive observation number to determine anomaly identification, by default 3</span>
+<span class="sd">    state_intervaldays: float</span>
+<span class="sd">        If larger than 0, output states at a day interval of state_intervaldays, by default 0.0 (meaning that no states will be outputted). For more details, refer to state-space models (e.g., http://www.scholarpedia.org/article/State_space_model)</span>
+<span class="sd">    fitting_coefs: bool</span>
+<span class="sd">        If True, use curve fitting to get harmonic coefficients for the temporal segment, otherwise use the local coefficients from kalman filter, by default False.</span>
+<span class="sd">    tmask_b1_index: int</span>
+<span class="sd">        The first band id for tmask. Started from 1. The default CCDC is 2 (green)</span>
+<span class="sd">    tmask_b2_index: int</span>
+<span class="sd">        The second band id for tmask. Started from 1. The default CCDC is 5 (swir1)</span>
+<span class="sd">    trimodal: bool</span>
+<span class="sd">        indicate if trimodal component (the period is four months) is added into the temporal coefficients. If true, the harmonic models will be 8-coefs; if false, the harmonic models will be 6-coefs;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :py:type:`~pyxccd.common.SccdOutput` | (:py:type:`~pyxccd.common.SccdOutput`, pd.DataFrame)</span>
+
+<span class="sd">    If b_output_state is False, sccdoutput will be returned (by default);</span>
+<span class="sd">    if b_output_state is True,  (sccdoutput, states_info) will be returned;</span>
+<span class="sd">        sccdoutput: :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">            A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</span>
+
+<span class="sd">        states_info: pd.DataFrame</span>
+<span class="sd">            A table of three state time series (trend, annual, semiannual) for nbands inputted spectral bands</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check whether the dates are arranged in ascending order</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">))</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_stack</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;sccd_detect_flex&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">sccd_conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="o">=</span><span class="n">output_anomaly</span><span class="p">,</span>
+        <span class="n">anomaly_pcg</span><span class="o">=</span><span class="n">anomaly_pcg</span><span class="p">,</span>
+        <span class="n">anomaly_conse</span><span class="o">=</span><span class="n">anomaly_conse</span><span class="p">,</span>
+        <span class="n">state_intervaldays</span><span class="o">=</span><span class="n">state_intervaldays</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+        <span class="n">trimodal</span><span class="o">=</span><span class="n">trimodal</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># make sure it is c contiguous array and 64 bit</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+    <span class="n">valid_num_scenes</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nbands</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">nbands</span> <span class="o">&gt;</span> <span class="n">MAX_FLEX_BAND_SCCD</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t input more than </span><span class="si">{</span><span class="n">MAX_FLEX_BAND_SCCD</span><span class="si">}</span><span class="s2"> bands (</span><span class="si">{</span><span class="n">nbands</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">MAX_FLEX_BAND_SCCD</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">tmask_b1_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tmask_b2_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;tmask_b1_index or tmask_b2_index is larger than the input band number&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">max_t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.9999</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">anomaly_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">anomaly_pcg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="c1"># sccd_wrapper = SccdDetectWrapper()</span>
+    <span class="c1"># tmp = copy.deepcopy(sccd_wrapper.sccd_detect(dates, ts_b, ts_g, ts_r, ts_n, ts_s1, ts_s2, ts_t, qas, t_cg,</span>
+    <span class="c1">#                                 pos, conse, b_c2, output_anomaly, anomaly_tcg, b_monitor_init))</span>
+    <span class="c1"># return tmp</span>
+    <span class="n">b_output_state</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">state_intervaldays</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">_sccd_detect_flex</span><span class="p">(</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_stack</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">valid_num_scenes</span><span class="p">,</span>
+        <span class="n">nbands</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">max_t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="p">,</span>
+        <span class="n">anomaly_tcg</span><span class="p">,</span>
+        <span class="n">anomaly_conse</span><span class="p">,</span>
+        <span class="n">DEFAULT_PRED_TCG</span><span class="p">,</span>
+        <span class="n">b_output_state</span><span class="p">,</span>
+        <span class="n">state_intervaldays</span><span class="p">,</span>
+        <span class="n">tmask_b1_index</span><span class="p">,</span>
+        <span class="n">tmask_b2_index</span><span class="p">,</span>
+        <span class="n">fitting_coefs</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+        <span class="n">trimodal</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sccd_update_flex">
+<a class="viewcode-back" href="../../api/pyxccd.ccd.html#pyxccd.ccd.sccd_update_flex">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sccd_update_flex</span><span class="p">(</span>
+    <span class="n">sccd_pack</span><span class="p">,</span>
+    <span class="n">dates</span><span class="p">,</span>
+    <span class="n">ts_stack</span><span class="p">,</span>
+    <span class="n">qas</span><span class="p">,</span>
+    <span class="n">lam</span><span class="p">,</span>
+    <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">conse</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">anomaly_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">predictability_pcg</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span>
+    <span class="n">tmask_b1_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">tmask_b2_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">trimodal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SCCD online update for new observations for any band combination</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sccd_pack: namedtuple</span>
+<span class="sd">    dates: numpy.ndarray</span>
+<span class="sd">        1d new time series of ordinal dates of shape(n_obs,)</span>
+<span class="sd">    ts_stack: numpy.ndarray</span>
+<span class="sd">        2d array of shape (n_obs,), horizontally stacked multispectral time series. The maximum band number is 10.</span>
+<span class="sd">    qas: numpy.ndarray</span>
+<span class="sd">        1d new time series of QA cfmask band of shape(n_obs,). &#39;0&#39; - clear; &#39;1&#39; - water; &#39;2&#39; - shadow; &#39;3&#39; - snow; &#39;4&#39; - cloud</span>
+<span class="sd">    lam: float</span>
+<span class="sd">        The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</span>
+<span class="sd">    p_cg: float</span>
+<span class="sd">        Probability threshold of change magnitude, by default 0.99</span>
+<span class="sd">    conse: int</span>
+<span class="sd">        Consecutive observation number, by default 6</span>
+<span class="sd">    pos: int</span>
+<span class="sd">        Position id of the pixel, by default 1</span>
+<span class="sd">    b_c2: bool</span>
+<span class="sd">        A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid</span>
+<span class="sd">        pixel test due to the current low quality. by default True</span>
+<span class="sd">    anomaly_pcg: float</span>
+<span class="sd">        Change probability threshold for defining spectral anomalies /anomaly, by default 0.90.</span>
+<span class="sd">    predictability_pcg: float</span>
+<span class="sd">        Probability threshold for predictability test. If not passed, the nrt_mode will return 11. by default 0.90.</span>
+<span class="sd">    trimodal: bool</span>
+<span class="sd">        indicate if trimodal component (the period is four months) is added into the temporal coefficients. If true, the harmonic models will be 8-coefs; if false, the harmonic models will be 6-coefs;</span>
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :py:type:`~pyxccd.common.SccdOutput`</span>
+<span class="sd">        A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if not isinstance(sccd_pack, SccdOutput):</span>
+    <span class="c1">#     raise ValueError(&quot;The type of sccd_pack has to be namedtuple &#39;SccdOutput&#39;!&quot;)</span>
+
+    <span class="n">_validate_params</span><span class="p">(</span>
+        <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;sccd_update_flex&quot;</span><span class="p">,</span>
+        <span class="n">p_cg</span><span class="o">=</span><span class="n">p_cg</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+        <span class="n">sccd_conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">output_anomaly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">anomaly_pcg</span><span class="o">=</span><span class="n">anomaly_pcg</span><span class="p">,</span>
+        <span class="n">predictability_pcg</span><span class="o">=</span><span class="n">predictability_pcg</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+        <span class="n">trimodal</span><span class="o">=</span><span class="n">trimodal</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">_validate_data_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">ts_stack</span><span class="p">,</span> <span class="n">qas</span><span class="p">))</span>
+        <span class="n">sorted_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ts_stack</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">qas</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">valid_num_scenes</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nbands</span> <span class="o">=</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">ts_stack</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">nbands</span> <span class="o">&gt;</span> <span class="n">MAX_FLEX_BAND_SCCD</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Can&#39;t input more than </span><span class="si">{</span><span class="n">MAX_FLEX_BAND_SCCD</span><span class="si">}</span><span class="s2"> bands (</span><span class="si">{</span><span class="n">nbands</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">MAX_FLEX_BAND_SCCD</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">tmask_b1_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tmask_b2_index</span> <span class="o">&gt;</span> <span class="n">nbands</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;tmask_b1_index or tmask_b2_index is larger than the input band number&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">p_cg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">max_t_cg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.9999</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">anomaly_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">anomaly_pcg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+    <span class="n">predictability_tcg</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">predictability_pcg</span><span class="p">,</span> <span class="n">nbands</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_sccd_update_flex</span><span class="p">(</span>
+        <span class="n">sccd_pack</span><span class="p">,</span>
+        <span class="n">dates</span><span class="p">,</span>
+        <span class="n">ts_stack</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+        <span class="n">qas</span><span class="p">,</span>
+        <span class="n">valid_num_scenes</span><span class="p">,</span>
+        <span class="n">nbands</span><span class="p">,</span>
+        <span class="n">t_cg</span><span class="p">,</span>
+        <span class="n">max_t_cg</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">anomaly_tcg</span><span class="p">,</span>
+        <span class="n">predictability_tcg</span><span class="p">,</span>
+        <span class="n">tmask_b1_index</span><span class="p">,</span>
+        <span class="n">tmask_b2_index</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+        <span class="n">trimodal</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pyxccd Tutorial(English)" href="tutorial_en.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#easy-installation">1. Easy installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-installation">2. Advanced installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-required-libraries">2.1 Install Required Libraries</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>Installation of the pyxsccd package is complicated by its dependency on libgdal
+and other C libraries. There are easy installations paths and an advanced
+installation path.</p>
+<section id="easy-installation">
+<h2>1. Easy installation<a class="headerlink" href="#easy-installation" title="Link to this heading">¶</a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install pyxsccd</span>
+</pre></div>
+</div>
+<p>These wheels are mainly intended to make installation easy for simple
+applications, not so much for production. They are not tested for compatibility
+with all other binary wheels, conda packages, or QGIS.</p>
+<p>Pyxccd 1.0 requires Python 3.8 or higher.</p>
+</section>
+<section id="advanced-installation">
+<h2>2. Advanced installation<a class="headerlink" href="#advanced-installation" title="Link to this heading">¶</a></h2>
+<p>The steps to install this library in development mode are consolidated
+into a single script: <code class="docutils literal notranslate"><span class="pre">run_developer_setup.sh</span></code>.  On debian-based systems,
+this will install all of the developer requirements and ensure you are setup
+with a working opencv-python-headless Python modules, as well as other
+requirements and then it will compile and install pyxccd in editable
+development mode.</p>
+<p>The following is an overview of these details and alternative choices that
+could be made.</p>
+<section id="install-required-libraries">
+<h3>2.1 Install Required Libraries<a class="headerlink" href="#install-required-libraries" title="Link to this heading">¶</a></h3>
+<p>The ZLIB, GSL libraries are required.</p>
+<p>For Ubuntu/Debian systems, they can be installed via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>build-essential<span class="w">  </span>-y
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>zlib1g-dev<span class="w"> </span>-y
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gfortran<span class="w"> </span>-y
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>libgsl-dev<span class="w"> </span>-y
+</pre></div>
+</div>
+<p>On CentOS systems run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gcc<span class="w"> </span>gcc-c++<span class="w"> </span>make<span class="w">  </span>-y
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>zlib-devel<span class="w"> </span>-y
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>gcc-gfortran<span class="w"> </span>-y
+<span class="c1"># Yum provides an gsl 1.5, but we need 2.7</span>
+<span class="c1"># sudo apt-get install gsl-devel -y</span>
+curl<span class="w"> </span>https://ftp.gnu.org/gnu/gsl/gsl-2.7.1.tar.gz<span class="w">  </span>&gt;<span class="w"> </span>gsl.tar.gz<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>tar<span class="w"> </span>xfv<span class="w"> </span>gsl.tar.gz<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>gsl-2.7.1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./configure<span class="w"> </span>--prefix<span class="o">=</span>/usr<span class="w"> </span>--disable-static<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>install
+</pre></div>
+</div>
+<p>2.2 Install required python packages
+The following instructure assume you are inside a Python virtual environment
+(e.g. via conda or pyenv).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install required packages</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+<p>Additionally, to access the <code class="docutils literal notranslate"><span class="pre">cv2</span></code> module, pyxccd will require either
+<code class="docutils literal notranslate"><span class="pre">opencv-python</span></code> or <code class="docutils literal notranslate"><span class="pre">opencv-python-headless</span></code>, which are mutually exclusive.
+This is exposed as optional dependencies in the package via either “graphics”
+or “headless” extras.  Headless mode is recommended as it is more compatible
+with other libraries. These can be obtained manually via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements/headless.txt
+
+<span class="c1"># XOR (choose only one!)</span>
+
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements/graphics.txt
+</pre></div>
+</div>
+<p>2.3 Install pyxccd
+<strong>Option 1: Install in development mode</strong></p>
+<p>For details on installing in development mode see the
+<a class="reference external" href="docs/source/developer_install.rst">developer install instructions</a>.</p>
+<p>We note that all steps in the above document and other minor details are
+consolidated in the <code class="docutils literal notranslate"><span class="pre">run_developer_setup.sh</span></code> script.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>run_developer_setup.sh
+</pre></div>
+</div>
+<p><strong>Option 2: Build and install a wheel</strong></p>
+<p>Scikit-build will invoke CMake and build everything. (you may need to
+remove any existing <code class="docutils literal notranslate"><span class="pre">_skbuild</span></code> directory).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>build<span class="w"> </span>--wheel<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Then you can pip install the wheel (the exact path will depend on your system
+and version of python).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dist/pyxccd-0.1.0-cp38-cp38-linux_x86_64.whl
+</pre></div>
+</div>
+<p>You can also use the <code class="docutils literal notranslate"><span class="pre">build_wheels.sh</span></code> script to invoke cibuildwheel to
+produce portable wheels that can be installed on different than they were built
+on. You must have docker and cibuildwheel installed to use this.</p>
+<p><strong>Option 3: build standalone binaries with CMake by itself (recommended for C development)</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_en.html" class="btn btn-neutral float-right" title="Pyxccd Tutorial(English)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

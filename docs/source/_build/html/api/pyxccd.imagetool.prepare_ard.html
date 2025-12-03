@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyxccd.imagetool.prepare_ard module &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyxccd.imagetool.tile_processing module" href="pyxccd.imagetool.tile_processing.html" />
+    <link rel="prev" title="pyxccd.imagetool.export_change_map module" href="pyxccd.imagetool.export_change_map.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pyxccd.html">Pyxccd API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyxccd.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pyxccd.imagetool.html">pyxccd.imagetool package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pyxccd.imagetool.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pyxccd.imagetool.html#module-pyxccd.imagetool">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyxccd.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyxccd.html#module-pyxccd">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyxccd.html">pyxccd package</a></li>
+          <li class="breadcrumb-item"><a href="pyxccd.imagetool.html">pyxccd.imagetool package</a></li>
+      <li class="breadcrumb-item active">pyxccd.imagetool.prepare_ard module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyxccd.imagetool.prepare_ard.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyxccd.imagetool.prepare_ard">
+<span id="pyxccd-imagetool-prepare-ard-module"></span><h1>pyxccd.imagetool.prepare_ard module<a class="headerlink" href="#module-pyxccd.imagetool.prepare_ard" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.mask_value">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">mask_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#mask_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.mask_value" title="Link to this definition">¶</a></dt>
+<dd><p>Build a boolean mask around a certain value in the vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> – 1-d ndarray of values</p></li>
+<li><p><strong>val</strong> – values to mask on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1-d boolean ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.qabitval_array_HLS">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">qabitval_array_HLS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packedint_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#qabitval_array_HLS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.qabitval_array_HLS" title="Link to this definition">¶</a></dt>
+<dd><p>Institute a hierarchy of qa values that may be flagged in the bitpacked
+value.</p>
+<p>fill &gt; cloud &gt; shadow &gt; snow &gt; water &gt; clear</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packedint</strong> – int value to bit check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>offset value to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.qabitval_array">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">qabitval_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packedint_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#qabitval_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.qabitval_array" title="Link to this definition">¶</a></dt>
+<dd><p>Institute a hierarchy of qa values that may be flagged in the bitpacked
+value.
+fill &gt; cloud &gt; shadow &gt; snow &gt; water &gt; clear
+:Parameters: <strong>packedint</strong> – int value to bit check</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>offset value to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.qabitval_array_c2">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">qabitval_array_c2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packedint_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#qabitval_array_c2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.qabitval_array_c2" title="Link to this definition">¶</a></dt>
+<dd><p>Institute a hierarchy of qa values that may be flagged in the bitpacked
+value for c2</p>
+<p>fill &gt; cloud &gt; shadow &gt; snow &gt; water &gt; clear</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packedint</strong> – int value to bit check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>offset value to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.single_image_stacking_hls">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">single_image_stacking_hls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyxccd.common.html#pyxccd.common.DatasetInfo" title="pyxccd.common.DatasetInfo"><span class="pre">DatasetInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_partition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upp_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#single_image_stacking_hls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.single_image_stacking_hls" title="Link to this definition">¶</a></dt>
+<dd><p>unzip single image, convert bit-pack qa to byte value, and save as numpy
+:param source_dir: the parent folder to save image ‘folder’
+:param out_dir: the folder to save result
+:param logger: the handler of logger file
+:param data_info: data info data class
+:param is_partition: True, partition each image into blocks; False, save original size of image
+:param clear_threshold: threshold of clear pixel percentage, if lower than threshold, won’t be processed
+:param low_date_bound: the lower date of user interested date range
+:param upp_date_bound: the upper date of user interested date range
+:param folder: the folder name of image
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.single_image_stacking">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">single_image_stacking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyxccd.common.html#pyxccd.common.DatasetInfo" title="pyxccd.common.DatasetInfo"><span class="pre">DatasetInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_partition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upp_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#single_image_stacking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.single_image_stacking" title="Link to this definition">¶</a></dt>
+<dd><p>unzip single image, convert bit-pack qa to byte value, and save as numpy
+:param tmp_path: tmp folder to save unzip image
+:param source_dir: image folder save source zipped files
+:param out_dir: the folder to save result
+:param clear_threshold: threshold of clear pixel percentage, if lower than threshold, won’t be processed
+:param path_array: path array has the same dimension of inputted image, and the pixel value indicates</p>
+<blockquote>
+<div><p>the path which the pixel belongs to; if path_array == none, we will use all path</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> – the handler of logger file</p></li>
+<li><p><strong>dataset_info</strong> – dataset information</p></li>
+<li><p><strong>is_partition</strong> – True, partition each image into blocks; False, save original size of image</p></li>
+<li><p><strong>low_date_bound</strong> – the lower bound of user interested year range</p></li>
+<li><p><strong>upp_date_bound</strong> – the upper bound of user interested year range</p></li>
+<li><p><strong>b_c2</strong> – False</p></li>
+<li><p><strong>folder</strong> – the folder name of image</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.single_image_stacking_collection2">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">single_image_stacking_collection2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clear_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.14)"><span class="pre">Logger</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pyxccd.common.html#pyxccd.common.DatasetInfo" title="pyxccd.common.DatasetInfo"><span class="pre">DatasetInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_partition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">low_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upp_date_bound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#single_image_stacking_collection2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.single_image_stacking_collection2" title="Link to this definition">¶</a></dt>
+<dd><p>for collection 2
+:param tmp_path: tmp folder to save unzip image
+:param source_dir: image folder save source zipped files
+:param out_dir: the folder to save result
+:param clear_threshold: threshold of clear pixel percentage, if lower than threshold, won’t be processed
+:param logger: the handler of logger file
+:param dataset_info:DatasetInfo
+:param is_partition: True, partition each image into blocks; False, save original size of image
+:param low_date_bound: the lower bound of user interested date range
+:param upp_date_bound: the upper bound of user interested date range
+:param bounds
+:param folder: the folder name of image
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.checkfinished_step1">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">checkfinished_step1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tmp_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#checkfinished_step1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.checkfinished_step1" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tmp_path</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.checkfinished_step2">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">checkfinished_step2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cores</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#checkfinished_step2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.checkfinished_step2" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out_dir</strong></p></li>
+<li><p><strong>n_cores</strong></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.checkfinished_step3_partition">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">checkfinished_step3_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#checkfinished_step3_partition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.checkfinished_step3_partition" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_dir</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.checkfinished_step3_nopartition">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">checkfinished_step3_nopartition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#checkfinished_step3_nopartition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.checkfinished_step3_nopartition" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_dir</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.get_extent">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">get_extent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extent_geojson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#get_extent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.get_extent" title="Link to this definition">¶</a></dt>
+<dd><p>read shapefile of a tile from an S3 bucket, and convert projection to be aligned with sample image.
+arg:</p>
+<blockquote>
+<div><p>‘extent_geojson’: sharply geojson object
+res: planet resolution</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(float, float, float, float), (int, int)) tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.get_feature">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">get_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#get_feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.get_feature" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.explode">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">explode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#explode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.explode" title="Link to this definition">¶</a></dt>
+<dd><p>Explode a GeoJSON geometry’s coordinates object and yield coordinate tuples.
+As long as the input is conforming, the type of the geometry doesn’t matter.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.imagetool.prepare_ard.bbox">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.imagetool.prepare_ard.</span></span><span class="sig-name descname"><span class="pre">bbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/imagetool/prepare_ard.html#bbox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.imagetool.prepare_ard.bbox" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyxccd.imagetool.export_change_map.html" class="btn btn-neutral float-left" title="pyxccd.imagetool.export_change_map module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyxccd.imagetool.tile_processing.html" class="btn btn-neutral float-right" title="pyxccd.imagetool.tile_processing module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

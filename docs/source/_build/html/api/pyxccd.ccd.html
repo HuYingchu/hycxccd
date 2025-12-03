@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyxccd.ccd module &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyxccd.pyclassifier module" href="pyxccd.pyclassifier.html" />
+    <link rel="prev" title="pyxccd.imagetool.tile_processing module" href="pyxccd.imagetool.tile_processing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pyxccd.html">Pyxccd API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyxccd.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pyxccd.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyxccd.ccd module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.cold_detect"><code class="docutils literal notranslate"><span class="pre">cold_detect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.obcold_reconstruct"><code class="docutils literal notranslate"><span class="pre">obcold_reconstruct()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.sccd_detect"><code class="docutils literal notranslate"><span class="pre">sccd_detect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.sccd_update"><code class="docutils literal notranslate"><span class="pre">sccd_update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.sccd_identify"><code class="docutils literal notranslate"><span class="pre">sccd_identify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.cold_detect_flex"><code class="docutils literal notranslate"><span class="pre">cold_detect_flex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.sccd_detect_flex"><code class="docutils literal notranslate"><span class="pre">sccd_detect_flex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyxccd.ccd.sccd_update_flex"><code class="docutils literal notranslate"><span class="pre">sccd_update_flex()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pyxccd.pyclassifier.html">pyxccd.pyclassifier module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyxccd.utils.html">pyxccd.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyxccd.common.html">pyxccd.common module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyxccd.html#module-pyxccd">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pyxccd.html">pyxccd package</a></li>
+      <li class="breadcrumb-item active">pyxccd.ccd module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/pyxccd.ccd.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pyxccd.ccd">
+<span id="pyxccd-ccd-module"></span><h1>pyxccd.ccd module<a class="headerlink" href="#module-pyxccd.ccd" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.cold_detect">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">cold_detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm_output_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">365.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#cold_detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.cold_detect" title="Link to this definition">¶</a></dt>
+<dd><p>running pixel-based COLD algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_b</strong> (<em>numpy.ndarray</em>) – 1d time series of blue band of shape(n_obs,)</p></li>
+<li><p><strong>ts_g</strong> (<em>numpy.ndarray</em>) – 1d time series of green band of shape(n_obs,)</p></li>
+<li><p><strong>ts_r</strong> (<em>numpy.ndarray</em>) – 1d time series of red band of shape(n_obs,)</p></li>
+<li><p><strong>ts_n</strong> (<em>numpy.ndarray</em>) – 1d time series of nir band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s1</strong> (<em>numpy.ndarray</em>) – 1d time series of swir1 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s2</strong> (<em>numpy.ndarray</em>) – 1d time series of swir2 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_t</strong> (<em>numpy.ndarray</em>) – 1d time series of thermal band of shape(n_obs,)</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – position id of the pixel, by default 1</p></li>
+<li><p><strong>output_cm</strong> (<em>bool</em>) – ‘True’ means outputting change magnitude and change magnitude dates (OB-COLD), i.e., (cold_results, cm_outputs, cm_outputs_date); ‘False’ will output only cold_results</p></li>
+<li><p><strong>starting_date</strong> (<em>int</em>) – the starting date of the whole dataset to enable reconstruct CM_date, all pixels for a tile. should have the same date, only for output_cm is True. by default 0.</p></li>
+<li><p><strong>n_cm</strong> (<em>int</em>) – length of outputted change magnitude. Only output_cm == ‘True’. by default 0.</p></li>
+<li><p><strong>cm_output_interval</strong> (<em>int</em>) – temporal interval of outputting change magnitudes. Only output_cm == ‘True’. by default 0.</p></li>
+<li><p><strong>b_c2</strong> (<em>bool</em>) – a temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid pixel test due to the current low quality. by default True</p></li>
+<li><p><strong>gap_days</strong> (<em>int</em>) – define the day number of the gap year for determining i_dense. The COLD will skip the i_dense days to set the starting point of the model. Setting a large value (e.g., 1500) if the gap year is in the middle of the time range. by default 365.25.</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>If  output_cm is False, a structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.cold_rec_cg" title="pyxccd.common.cold_rec_cg"><code class="xref py py-type docutils literal notranslate"><span class="pre">cold_rec_cg</span></code></a> is returnd;
+if output_cm is True, a tuple (cold_results, cm_outputs, cm_outputs_date) will be returned</p>
+<blockquote>
+<div><dl class="simple">
+<dt>cold_results: numpy.ndarray</dt><dd><p>A structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.cold_rec_cg" title="pyxccd.common.cold_rec_cg"><code class="xref py py-type docutils literal notranslate"><span class="pre">cold_rec_cg</span></code></a></p>
+</dd>
+<dt>cm_outputs: numpy.ndarray</dt><dd><p>Change magnitude list, shape (n_cm,)</p>
+</dd>
+<dt>cm_outputs_date: numpy.ndarray</dt><dd><p>Change magnitude date list, shape (n_cm,)</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a> | (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.obcold_reconstruct">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">obcold_reconstruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#obcold_reconstruct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.obcold_reconstruct" title="Link to this definition">¶</a></dt>
+<dd><p>re-contructructing change records using break dates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_b</strong> (<em>numpy.ndarray</em>) – 1d time series of blue band of shape(n_obs,)</p></li>
+<li><p><strong>ts_g</strong> (<em>numpy.ndarray</em>) – 1d time series of green band of shape(n_obs,)</p></li>
+<li><p><strong>ts_r</strong> (<em>numpy.ndarray</em>) – 1d time series of red band of shape(n_obs,)</p></li>
+<li><p><strong>ts_n</strong> (<em>numpy.ndarray</em>) – 1d time series of nir band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s1</strong> (<em>numpy.ndarray</em>) – 1d time series of swir1 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s2</strong> (<em>numpy.ndarray</em>) – 1d time series of swir2 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_t</strong> (<em>numpy.ndarray</em>) – 1d time series of thermal band of shape(n_obs,)</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>break_dates</strong> (<em>numpy.ndarray</em>) – 1d time series of break dates obtained from other procedures such as obia</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – position id of the pixel, by default 1</p></li>
+<li><p><strong>b_c2</strong> (<em>bool</em>) – a temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid pixel test due to the current low quality. by default True</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>cold_results: numpy.ndarray</dt><dd><p>A structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.cold_rec_cg" title="pyxccd.common.cold_rec_cg"><code class="xref py py-type docutils literal notranslate"><span class="pre">cold_rec_cg</span></code></a></p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.sccd_detect">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">sccd_detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_anomaly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_intervaldays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitting_coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#sccd_detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.sccd_detect" title="Link to this definition">¶</a></dt>
+<dd><p>Offline SCCD algorithm for processing historical time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_b</strong> (<em>numpy.ndarray</em>) – 1d time series of blue band of shape(n_obs,)</p></li>
+<li><p><strong>ts_g</strong> (<em>numpy.ndarray</em>) – 1d time series of green band of shape(n_obs,)</p></li>
+<li><p><strong>ts_r</strong> (<em>numpy.ndarray</em>) – 1d time series of red band of shape(n_obs,)</p></li>
+<li><p><strong>ts_n</strong> (<em>numpy.ndarray</em>) – 1d time series of nir band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s1</strong> (<em>numpy.ndarray</em>) – 1d time series of swir1 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s2</strong> (<em>numpy.ndarray</em>) – 1d time series of swir2 band of shape(n_obs,)</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – Probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – Consecutive observation number, by default 6. No more than 8.</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – Position id of the pixel, by default 1</p></li>
+<li><p><strong>b_c2</strong> (<em>bool</em>) – A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid
+pixel test due to the current low quality. by default True</p></li>
+<li><p><strong>output_anomaly</strong> (<em>bool</em>) – If true, output anomaly breaks where a anomaly is an overdetection of break using conse 3 and threshold = anomaly_tcg,
+which overdetects anomalies to simulate the situation of NRT scenario and for training a retrospective model, by default False.
+Note that anomalys is a type of breaks that do not trigger model initialization, against structural breaks (i.e., normal breaks).</p></li>
+<li><p><strong>anomaly_pcg</strong> (<em>float</em>) – Change probability threshold for defining spectral anomalies, by default 0.90.</p></li>
+<li><p><strong>anomaly_conse</strong> (<em>int</em>) – Consecutive observation number to determine anomaly identification, by default 3. No more than 8.</p></li>
+<li><p><strong>state_intervaldays</strong> (<em>float</em>) – If larger than 0, output states at a day interval of state_intervaldays, by default 0.0 (meaning that no states will be outputted). For more details, refer to state-space models (e.g., <a class="reference external" href="http://www.scholarpedia.org/article/State_space_model">http://www.scholarpedia.org/article/State_space_model</a>)</p></li>
+<li><p><strong>fitting_coefs</strong> (<em>bool</em>) – If True, use curve fitting to get harmonic coefficients for the temporal segment, otherwise use the local coefficients from kalman filter, by default False.</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>If output_anomaly is False and b_output_state is False, sccdoutput will be returned (by default);
+if output_anomaly is False and b_output_state is True,  (sccdoutput, states_info) will be returned;
+if output_anomaly is True, (sccdoutput, anomalys) will be returned</p>
+<blockquote>
+<div><dl class="simple">
+<dt>sccdoutput: <a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a></dt><dd><p>A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</p>
+</dd>
+<dt>states_info: pd.DataFrame</dt><dd><p>A table of three state time series (trend, annual, semiannual) for six inputted spectral bands</p>
+</dd>
+<dt>anomalys: numpy.ndarray</dt><dd><p>A structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.anomaly" title="pyxccd.common.anomaly"><code class="xref py py-type docutils literal notranslate"><span class="pre">anomaly</span></code></a></p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a> | (<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>, pd.DataFrame) | (<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>, numpy.ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.sccd_update">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">sccd_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sccd_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_s2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictability_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#sccd_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.sccd_update" title="Link to this definition">¶</a></dt>
+<dd><p>SCCD online update for new observations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sccd_pack</strong> (<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>) – The SCCD results outputted by the last process</p></li>
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d new time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_b</strong> (<em>numpy.ndarray</em>) – 1d new time series of blue band of shape(n_obs,)</p></li>
+<li><p><strong>ts_g</strong> (<em>numpy.ndarray</em>) – 1d new time series of green band of shape(n_obs,)</p></li>
+<li><p><strong>ts_r</strong> (<em>numpy.ndarray</em>) – 1d new time series of red band of shape(n_obs,)</p></li>
+<li><p><strong>ts_n</strong> (<em>numpy.ndarray</em>) – 1d new time series of nir band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s1</strong> (<em>numpy.ndarray</em>) – 1d new time series of swir1 band of shape(n_obs,)</p></li>
+<li><p><strong>ts_s2</strong> (<em>numpy.ndarray</em>) – 1d new time series of swir2 band of shape(n_obs,)</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d new time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – position id of the pixel, by default 1</p></li>
+<li><p><strong>anomaly_pcg</strong> (<em>float</em>) – change probability threshold for defining spectral anomalies, by default 0.90.</p></li>
+<li><p><strong>predictability_pcg</strong> (<em>float</em>) – probability threshold for predictability test. If not passed, the nrt_mode will return 11. by default 0.90.</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.sccd_identify">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">sccd_identify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sccd_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_cg_singleband</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">45</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#sccd_identify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.sccd_identify" title="Link to this definition">¶</a></dt>
+<dd><p>identify disturbance date for the current monitoring model from SccdOutput</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sccd_pack</strong> (<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>) – S-CCD output</p></li>
+<li><p><strong>dist_conse</strong> (<em>int</em>) – Minimum consecutive anomaly number required to identify disturbance, by default 6</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – Change magnitude probability threshold to identify disturbance, by default 0.99</p></li>
+<li><p><strong>t_cg_singleband</strong> (<em>float</em>) –   single-band change magnitude to identify greenning breaks, by default -200
+see Eq. 10 in Zhu, Z., Zhang, J., Yang, Z., Aljaddani, A. H., Cohen, W. B., Qiu, S., &amp; Zhou, C. (2020). Continuous monitoring of land disturbance based on Landsat time series. Remote Sensing of Environment, 238, 111116.</p></li>
+<li><p><strong>t_angle_scale100</strong> (<em>float</em>) – Threshold for included angle (scale by 100), by default 45</p></li>
+<li><p><strong>transform_mode</strong> (<em>bool</em>) – Transform the mode to untested predictability once the change has been detected. Default isFalse</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>(<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>, int)</dt><dd><p>The return date is either 0 (no disturbance) or the ordinal date of disturbance occurrence</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.cold_detect_flex">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">cold_detect_flex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm_output_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap_days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">365.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b1_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b2_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#cold_detect_flex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.cold_detect_flex" title="Link to this definition">¶</a></dt>
+<dd><p>running pixel-based COLD algorithm for any band combination (flexible mode).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_stack</strong> (<em>numpy.ndarray</em>) – 2d array of shape (n_obs, nbands), horizontally stacked multispectral time series.</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – Probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – Consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – position id of the pixel, by default 1</p></li>
+<li><p><strong>output_cm</strong> (<em>bool</em>) – ‘True’ means outputting change magnitude and change magnitude dates (OB-COLD), i.e.,
+(cold_results, cm_outputs, cm_outputs_date); ‘False’ will output only cold_results</p></li>
+<li><p><strong>starting_date</strong> (<em>int</em>) – The starting date of the whole dataset to enable reconstruct CM_date, all pixels for a tile should have the same date, only for output_cm is True. by default 0.</p></li>
+<li><p><strong>n_cm</strong> (<em>int</em>) – Length of outputted change magnitude. Only output_cm == ‘True’. by default 0.</p></li>
+<li><p><strong>cm_output_interval</strong> (<em>int</em>) – Temporal interval of outputting change magnitudes. Only output_cm == ‘True’. by default 0.</p></li>
+<li><p><strong>gap_days</strong> (<em>int</em>) – Define the day number of the gap year for determining i_dense. The COLD will skip the i_dense days to set the starting point of the model. Setting a large value (e.g., 1500) if the gap year is in the middle of the time range. by default 365.25.</p></li>
+<li><p><strong>tmask_b1_index</strong> (<em>int</em>) – The first band id for tmask. Started from 1. The default CCDC is 2 (green)</p></li>
+<li><p><strong>tmask_b2_index</strong> (<em>int</em>) – The second band id for tmask. Started from 1. The default CCDC is 5 (swir1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>If  output_cm is False, a structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.cold_rec_cg" title="pyxccd.common.cold_rec_cg"><code class="xref py py-type docutils literal notranslate"><span class="pre">cold_rec_cg</span></code></a> is returnd;
+if output_cm is True, a tuple (cold_results, cm_outputs, cm_outputs_date) will be returned</p>
+<blockquote>
+<div><dl class="simple">
+<dt>cold_results: numpy.ndarray</dt><dd><p>A structured array of dtype = <a class="reference internal" href="pyxccd.common.html#pyxccd.common.cold_rec_cg" title="pyxccd.common.cold_rec_cg"><code class="xref py py-type docutils literal notranslate"><span class="pre">cold_rec_cg</span></code></a></p>
+</dd>
+<dt>cm_outputs: numpy.ndarray</dt><dd><p>Change magnitude list, shape (n_cm,)</p>
+</dd>
+<dt>cm_outputs_date: numpy.ndarray</dt><dd><p>Change magnitude date list, shape (n_cm,)</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a> | (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)">numpy.ndarray</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.sccd_detect_flex">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">sccd_detect_flex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_anomaly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_intervaldays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b1_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b2_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitting_coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimodal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#sccd_detect_flex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.sccd_detect_flex" title="Link to this definition">¶</a></dt>
+<dd><p>Offline SCCD algorithm for processing historical time series for any band combination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_stack</strong> (<em>numpy.ndarray</em>) – 2d array of shape (n_obs, nbands), horizontally stacked multispectral time series. The maximum band number is 10..</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – Probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – Consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – Position id of the pixel, by default 1</p></li>
+<li><p><strong>b_c2</strong> (<em>bool</em>) – A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid
+pixel test due to the current low quality. by default True</p></li>
+<li><p><strong>output_anomaly</strong> (<em>bool</em>) – If true, output anomaly breaks where a anomaly is an overdetection of break using conse 3 and threshold = anomaly_tcg, which overdetects anomalies to simulate the situation of NRT scenario and for training a retrospective model, by default False.
+Note that anomalys is a type of breaks that do not trigger model initialization, against structural breaks (i.e., normal breaks).</p></li>
+<li><p><strong>anomaly_pcg</strong> (<em>float</em>) – Change probability threshold for defining spectral anomalies anomalys, by default 0.90.</p></li>
+<li><p><strong>anomaly_conse</strong> (<em>int</em>) – Consecutive observation number to determine anomaly identification, by default 3</p></li>
+<li><p><strong>state_intervaldays</strong> (<em>float</em>) – If larger than 0, output states at a day interval of state_intervaldays, by default 0.0 (meaning that no states will be outputted). For more details, refer to state-space models (e.g., <a class="reference external" href="http://www.scholarpedia.org/article/State_space_model">http://www.scholarpedia.org/article/State_space_model</a>)</p></li>
+<li><p><strong>fitting_coefs</strong> (<em>bool</em>) – If True, use curve fitting to get harmonic coefficients for the temporal segment, otherwise use the local coefficients from kalman filter, by default False.</p></li>
+<li><p><strong>tmask_b1_index</strong> (<em>int</em>) – The first band id for tmask. Started from 1. The default CCDC is 2 (green)</p></li>
+<li><p><strong>tmask_b2_index</strong> (<em>int</em>) – The second band id for tmask. Started from 1. The default CCDC is 5 (swir1)</p></li>
+<li><p><strong>trimodal</strong> (<em>bool</em>) – indicate if trimodal component (the period is four months) is added into the temporal coefficients. If true, the harmonic models will be 8-coefs; if false, the harmonic models will be 6-coefs;</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul>
+<li><p><a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a> | (<a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a>, pd.DataFrame)</p></li>
+<li><p><em>If b_output_state is False, sccdoutput will be returned (by default);</em></p></li>
+<li><p><em>if b_output_state is True,  (sccdoutput, states_info) will be returned;</em> –</p>
+<dl class="simple">
+<dt>sccdoutput: <a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a></dt><dd><p>A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</p>
+</dd>
+<dt>states_info: pd.DataFrame</dt><dd><p>A table of three state time series (trend, annual, semiannual) for nbands inputted spectral bands</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyxccd.ccd.sccd_update_flex">
+<span class="sig-prename descclassname"><span class="pre">pyxccd.ccd.</span></span><span class="sig-name descname"><span class="pre">sccd_update_flex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sccd_pack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_cg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_c2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictability_pcg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b1_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmask_b2_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trimodal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyxccd/ccd.html#sccd_update_flex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyxccd.ccd.sccd_update_flex" title="Link to this definition">¶</a></dt>
+<dd><p>SCCD online update for new observations for any band combination</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sccd_pack</strong> (<em>namedtuple</em>)</p></li>
+<li><p><strong>dates</strong> (<em>numpy.ndarray</em>) – 1d new time series of ordinal dates of shape(n_obs,)</p></li>
+<li><p><strong>ts_stack</strong> (<em>numpy.ndarray</em>) – 2d array of shape (n_obs,), horizontally stacked multispectral time series. The maximum band number is 10.</p></li>
+<li><p><strong>qas</strong> (<em>numpy.ndarray</em>) – 1d new time series of QA cfmask band of shape(n_obs,). ‘0’ - clear; ‘1’ - water; ‘2’ - shadow; ‘3’ - snow; ‘4’ - cloud</p></li>
+<li><p><strong>lam</strong> (<em>float</em>) – The lamba parameter used for lasso fitting that controls the regularization of the regression model. When lambda is 0, it is OLS regression.For landsat-like images (i.e., range is [0, 10000]), lambda is suggested to be 20.</p></li>
+<li><p><strong>p_cg</strong> (<em>float</em>) – Probability threshold of change magnitude, by default 0.99</p></li>
+<li><p><strong>conse</strong> (<em>int</em>) – Consecutive observation number, by default 6</p></li>
+<li><p><strong>pos</strong> (<em>int</em>) – Position id of the pixel, by default 1</p></li>
+<li><p><strong>b_c2</strong> (<em>bool</em>) – A temporal parameter to indicate if collection 2. C2 needs ignoring thermal band for valid
+pixel test due to the current low quality. by default True</p></li>
+<li><p><strong>anomaly_pcg</strong> (<em>float</em>) – Change probability threshold for defining spectral anomalies /anomaly, by default 0.90.</p></li>
+<li><p><strong>predictability_pcg</strong> (<em>float</em>) – Probability threshold for predictability test. If not passed, the nrt_mode will return 11. by default 0.90.</p></li>
+<li><p><strong>trimodal</strong> (<em>bool</em>) – indicate if trimodal component (the period is four months) is added into the temporal coefficients. If true, the harmonic models will be 8-coefs; if false, the harmonic models will be 6-coefs;</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A namedtuple (position, rec_cg, min_rmse, nrt_mode, nrt_model, nrt_queue)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pyxccd.common.html#pyxccd.common.SccdOutput" title="pyxccd.common.SccdOutput"><code class="xref py py-type docutils literal notranslate"><span class="pre">SccdOutput</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pyxccd.imagetool.tile_processing.html" class="btn btn-neutral float-left" title="pyxccd.imagetool.tile_processing module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pyxccd.pyclassifier.html" class="btn btn-neutral float-right" title="pyxccd.pyclassifier module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

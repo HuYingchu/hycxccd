@@ -1,0 +1,840 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pyxccd.imagetool.tile_processing &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+  
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">pyxccd.imagetool.tile_processing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pyxccd.imagetool.tile_processing</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Author: Su Ye</span>
+<span class="c1"># This script is an example for running pyscold in UCONN job array environment</span>
+<span class="c1"># Due to the independence features of job array, we use writing disk files for communication</span>
+<span class="c1"># Two types of logging files are used: 1) print() to save block-based  processing info into individual slurm file;</span>
+<span class="c1"># 2) tile_processing_report.log records config for each tile</span>
+<span class="c1"># 2) is only called when rank == 1</span>
+<span class="c1"># python tile_processing.py --stack_path=/data/results/204_22_stack --result_path=/data/results/204_22_ccdc --yaml_path=/home/colory666/pyxccd_imagetool/config.yaml --n_cores=30 &quot;--source_dir=/data/landsat_c2/204_22&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">join</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tarfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyxccd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytz</span><span class="w"> </span><span class="kn">import</span> <span class="n">timezone</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">chi2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateutil.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">cold_detect</span><span class="p">,</span> <span class="n">sccd_detect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">rio_loaddata</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">assemble_cmmaps</span><span class="p">,</span>
+    <span class="n">get_rowcol_intile</span><span class="p">,</span>
+    <span class="n">get_doy</span><span class="p">,</span>
+    <span class="n">unindex_sccdpack</span><span class="p">,</span>
+    <span class="n">class_from_dict</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pool</span>
+
+<span class="c1"># from pyxccd.ob_analyst import ObjectAnalystHPC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaults</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetInfo</span>
+
+<span class="n">TZ</span> <span class="o">=</span> <span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;Asia/Shanghai&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="tileprocessing_report">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.tileprocessing_report">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tileprocessing_report</span><span class="p">(</span>
+    <span class="n">result_log_path</span><span class="p">,</span>
+    <span class="n">stack_path</span><span class="p">,</span>
+    <span class="n">version</span><span class="p">,</span>
+    <span class="n">algorithm</span><span class="p">,</span>
+    <span class="n">dataset_info</span><span class="p">,</span>
+    <span class="n">startpoint</span><span class="p">,</span>
+    <span class="n">cold_timepoint</span><span class="p">,</span>
+    <span class="n">tz</span><span class="p">,</span>
+    <span class="n">n_cores</span><span class="p">,</span>
+    <span class="n">probability_threshold</span><span class="p">,</span>
+    <span class="n">conse</span><span class="p">,</span>
+    <span class="n">starting_date</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">n_cm_maps</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">year_lowbound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">year_uppbound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    output tile-based processing report</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    result_log_path: string</span>
+<span class="sd">        outputted log path</span>
+<span class="sd">    stack_path: string</span>
+<span class="sd">        stack path</span>
+<span class="sd">    version: string</span>
+<span class="sd">    algorithm: string</span>
+<span class="sd">    dataset_info: dictionary structure</span>
+<span class="sd">    startpoint: a time point, when the program starts</span>
+<span class="sd">    tz: string, time zone</span>
+<span class="sd">    n_cores: the core number used</span>
+<span class="sd">    starting_date: the first date of the total dataset</span>
+<span class="sd">    n_cm_maps: the number of snapshots</span>
+<span class="sd">    year_lowbound: the low bound of year range</span>
+<span class="sd">    year_uppbound: the upper bound of year range</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">result_log_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;pyxccd V</span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Author: Su Ye(remoteseningsuy@gmail.com)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Algorithm: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Starting_time: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">startpoint</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Change probability threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">probability_threshold</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Conse: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conse</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;stack_path: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stack_path</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;The number of requested cores: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_cores</span><span class="p">))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;The program starts at </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">startpoint</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;The COLD ends at </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cold_timepoint</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;The program ends at </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">endpoint</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="s2">&quot;The program lasts for </span><span class="si">{:.2f}</span><span class="s2">mins</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">endpoint</span> <span class="o">-</span> <span class="n">startpoint</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Starting date of the dataset: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">starting_date</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Number of snapshots being processed: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_cm_maps</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Lower bound of year range: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">year_lowbound</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Upper bound of year range: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">year_uppbound</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Land-cover-specific config:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C1_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C1_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C1_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C1_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C2_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C2_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C2_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C2_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C3_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C3_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C3_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C3_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C4_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C4_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C4_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C4_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C5_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C5_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C5_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C5_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C6_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C6_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C6_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C6_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C7_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C7_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C7_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C7_sizeslope&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C8_threshold: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C8_threshold&quot;</span><span class="p">]))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;  C8_sizeslope: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;OBCOLD&quot;</span><span class="p">][</span><span class="s2">&quot;C8_sizeslope&quot;</span><span class="p">]))</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="reading_start_dates_nmaps">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.reading_start_dates_nmaps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reading_start_dates_nmaps</span><span class="p">(</span><span class="n">stack_path</span><span class="p">,</span> <span class="n">cm_interval</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stack_path: string</span>
+<span class="sd">        stack_path for saving starting_last_dates.txt</span>
+<span class="sd">    cm_interval: interval</span>
+<span class="sd">        day interval for outputting change magnitudes</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        (starting_date, n_cm_maps)</span>
+<span class="sd">        starting_date - starting date is the first date of the whole dataset,</span>
+<span class="sd">        n_cm_maps - the number of change magnitudes to be outputted per pixel per band</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># read starting and ending dates, note that all blocks only has one starting and last date (mainly for obcold)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># read starting and ending date info from stack files</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">stack_path</span><span class="p">,</span> <span class="s2">&quot;starting_last_dates.txt&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">starting_date</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="n">ending_date</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+        <span class="n">n_cm_maps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">ending_date</span> <span class="o">-</span> <span class="n">starting_date</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">cm_interval</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">starting_date</span><span class="p">,</span> <span class="n">n_cm_maps</span></div>
+
+
+
+<div class="viewcode-block" id="is_finished_cold_blockfinished">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.is_finished_cold_blockfinished">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_finished_cold_blockfinished</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="n">nblocks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    check if the COLD algorithm finishes all blocks</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    result_path: the path that save COLD results</span>
+<span class="sd">    nblocks: the block number</span>
+
+<span class="sd">    Returns: boolean</span>
+<span class="sd">    -------</span>
+<span class="sd">        True -&gt; all block finished</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nblocks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;COLD_block</span><span class="si">{}</span><span class="s2">_finished.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="is_finished_assemble_cmmaps">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.is_finished_assemble_cmmaps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_finished_assemble_cmmaps</span><span class="p">(</span><span class="n">cmmap_path</span><span class="p">,</span> <span class="n">n_cm</span><span class="p">,</span> <span class="n">starting_date</span><span class="p">,</span> <span class="n">cm_interval</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cmmap_path: the path for saving change magnitude maps</span>
+<span class="sd">    n_cm: the number of change magnitudes outputted per pixel</span>
+<span class="sd">    starting_date: the starting date of the whole dataset</span>
+<span class="sd">    cm_interval: the day interval for outputting change magnitudes</span>
+
+<span class="sd">    Returns: boolean</span>
+<span class="sd">    -------</span>
+<span class="sd">    True -&gt; assemble finished</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_cm</span><span class="p">):</span>
+        <span class="n">ordinal_date</span> <span class="o">=</span> <span class="n">starting_date</span> <span class="o">+</span> <span class="n">count</span> <span class="o">*</span> <span class="n">cm_interval</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">join</span><span class="p">(</span>
+                <span class="n">cmmap_path</span><span class="p">,</span>
+                <span class="s2">&quot;CM_maps_</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">),</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">)</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+                    <span class="n">get_doy</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">join</span><span class="p">(</span>
+                <span class="n">cmmap_path</span><span class="p">,</span>
+                <span class="s2">&quot;CM_date_maps_</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">),</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">)</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+                    <span class="n">get_doy</span><span class="p">(</span><span class="n">ordinal_date</span><span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="get_stack_date">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.get_stack_date">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_stack_date</span><span class="p">(</span>
+    <span class="n">dataset_info</span><span class="p">:</span> <span class="n">DatasetInfo</span><span class="p">,</span>
+    <span class="n">block_x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">block_y</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">stack_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">low_datebound</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">high_datebound</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">999999</span><span class="p">,</span>
+    <span class="n">nband</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param dataset_info:</span>
+<span class="sd">    :param block_x: block id at x axis</span>
+<span class="sd">    :param block_y: block id at y axis</span>
+<span class="sd">    :param stack_path: stack path</span>
+<span class="sd">    :param low_datebound: ordinal data of low bounds of selection date range</span>
+<span class="sd">    :param high_datebound: ordinal data of upper bounds of selection date range</span>
+<span class="sd">    :return:</span>
+<span class="sd">        img_tstack, img_dates_sorted</span>
+<span class="sd">        img_tstack - 3-d array (dataset_info.block_width * dataset_info.block_height, nband, nimage)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">/</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span>
+    <span class="p">)</span>  <span class="c1"># width of a block</span>
+    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_rows</span> <span class="o">/</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span>
+    <span class="p">)</span>  <span class="c1"># height of a block</span>
+    <span class="n">block_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">stack_path</span><span class="p">,</span> <span class="s2">&quot;block_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">))</span>
+    <span class="n">img_files</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">block_folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="c1"># sort image files by dates</span>
+    <span class="n">img_dates</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">toordinal</span><span class="p">(</span>
+            <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">folder_name</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">13</span><span class="p">]),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">folder_name</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">16</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">folder_name</span> <span class="ow">in</span> <span class="n">img_files</span>
+    <span class="p">]</span>
+    <span class="n">img_dates_selected</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">img_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_dates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">img_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">low_datebound</span> <span class="ow">and</span> <span class="n">img_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">high_datebound</span>
+    <span class="p">]</span>
+    <span class="n">img_files_selected</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">img_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_dates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">img_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">low_datebound</span> <span class="ow">and</span> <span class="n">img_dates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">high_datebound</span>
+    <span class="p">]</span>
+
+    <span class="n">files_date_zip</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">img_dates_selected</span><span class="p">,</span> <span class="n">img_files_selected</span><span class="p">))</span>
+    <span class="n">img_files_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">files_date_zip</span><span class="p">]</span>
+    <span class="n">img_dates_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">files_date_zip</span><span class="p">])</span>
+    <span class="n">img_tstack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">block_folder</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">,</span> <span class="n">nband</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">img_files_sorted</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">img_tstack</span><span class="p">,</span> <span class="n">img_dates_sorted</span></div>
+
+
+
+<div class="viewcode-block" id="block_tile_processing">
+<a class="viewcode-back" href="../../../api/pyxccd.imagetool.tile_processing.html#pyxccd.imagetool.tile_processing.block_tile_processing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">block_tile_processing</span><span class="p">(</span>
+    <span class="n">dataset_info</span><span class="p">,</span>
+    <span class="n">stack_path</span><span class="p">,</span>
+    <span class="n">result_path</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">,</span>
+    <span class="n">n_cm_maps</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">,</span>
+    <span class="n">conse</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="p">,</span>
+    <span class="n">starting_date</span><span class="p">,</span>
+    <span class="n">cm_output_interval</span><span class="p">,</span>
+    <span class="n">low_datebound</span><span class="p">,</span>
+    <span class="n">upper_datebound</span><span class="p">,</span>
+    <span class="n">block_id</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">block_id</span> <span class="o">&gt;</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span><span class="p">:</span>
+        <span class="k">return</span>
+        <span class="c1"># note that block_x and block_y start from 1</span>
+    <span class="n">block_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">block_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">block_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">block_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;COLD_block</span><span class="si">{}</span><span class="s2">_finished.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_id</span><span class="p">))):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Per-pixel COLD processing is finished for block_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">img_tstack</span><span class="p">,</span> <span class="n">img_dates_sorted</span> <span class="o">=</span> <span class="n">get_stack_date</span><span class="p">(</span>
+        <span class="n">dataset_info</span><span class="p">,</span> <span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">,</span> <span class="n">stack_path</span><span class="p">,</span> <span class="n">low_datebound</span><span class="p">,</span> <span class="n">upper_datebound</span>
+    <span class="p">)</span>
+
+    <span class="c1"># initialize a list (may better change it to generator for future)</span>
+    <span class="n">result_collect</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">CM_collect</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">date_collect</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">img_tstack</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># empty block</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">):</span>
+                <span class="n">CM_collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cm_maps</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">))</span>
+                <span class="n">date_collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cm_maps</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">))</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;CM_date_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">date_collect</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;CM_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">)),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">CM_collect</span><span class="p">),</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># for sccd, as the output is heterogeneous, we continuously save the sccd pack for each pixel</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;SCCDOFFLINE&quot;</span><span class="p">:</span>
+            <span class="c1"># block_status = np.full((dataset_info.block_width, dataset_info.block_height), 0, dtype=np.int8)</span>
+            <span class="c1"># block_last_change_date = np.full((dataset_info.block_width, dataset_info.block_height), 0, dtype=np.int32)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">join</span><span class="p">(</span>
+                    <span class="n">result_path</span><span class="p">,</span>
+                    <span class="s2">&quot;record_change_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">_sccd.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;wb+&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># start looping every pixel in the block</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">):</span>
+                <span class="n">original_row</span><span class="p">,</span> <span class="n">original_col</span> <span class="o">=</span> <span class="n">get_rowcol_intile</span><span class="p">(</span>
+                    <span class="n">pos</span><span class="p">,</span>
+                    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span><span class="p">,</span>
+                    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">,</span>
+                    <span class="n">block_x</span><span class="p">,</span>
+                    <span class="n">block_y</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span>
+                        <span class="n">img_dates_sorted</span><span class="p">,</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                        <span class="n">p_cg</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                        <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+                        <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+                        <span class="n">pos</span><span class="o">=</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">*</span> <span class="p">(</span><span class="n">original_row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">original_col</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s2">&quot;S-CCD fails at original_row </span><span class="si">{}</span><span class="s2">, original_col </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">original_row</span><span class="p">,</span>
+                            <span class="n">original_col</span><span class="p">,</span>
+                            <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># replace structural array to list for saving storage space</span>
+                    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">unindex_sccdpack</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">),</span> <span class="n">f</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c1"># from pyxccd.utils import save_obs2csv</span>
+            <span class="c1"># save_obs2csv(&#39;/home/coloury/Dropbox/UCONN/NRT/test_src/sccd_packid{}.csv&#39;.format(pos),</span>
+            <span class="c1">#              pd.DataFrame(np.vstack((img_dates_sorted, img_tstack[pos, :, :])).T))</span>
+
+            <span class="c1"># free memory</span>
+            <span class="k">del</span> <span class="n">img_tstack</span>
+            <span class="k">del</span> <span class="n">img_dates_sorted</span>
+            <span class="c1"># del block_status</span>
+            <span class="c1"># del block_last_change_date</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># start looping every pixel in the block</span>
+            <span class="c1"># for pos in [17682]:</span>
+            <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">):</span>
+                <span class="n">original_row</span><span class="p">,</span> <span class="n">original_col</span> <span class="o">=</span> <span class="n">get_rowcol_intile</span><span class="p">(</span>
+                    <span class="n">pos</span><span class="p">,</span>
+                    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span><span class="p">,</span>
+                    <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">,</span>
+                    <span class="n">block_x</span><span class="p">,</span>
+                    <span class="n">block_y</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+                        <span class="p">[</span><span class="n">cold_result</span><span class="p">,</span> <span class="n">CM</span><span class="p">,</span> <span class="n">CM_date</span><span class="p">]</span> <span class="o">=</span> <span class="n">cold_detect</span><span class="p">(</span>
+                            <span class="n">img_dates_sorted</span><span class="p">,</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">pos</span><span class="o">=</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">*</span> <span class="p">(</span><span class="n">original_row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">original_col</span><span class="p">,</span>
+                            <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+                            <span class="n">starting_date</span><span class="o">=</span><span class="n">starting_date</span><span class="p">,</span>
+                            <span class="n">n_cm</span><span class="o">=</span><span class="n">n_cm_maps</span><span class="p">,</span>
+                            <span class="n">b_c2</span><span class="o">=</span><span class="n">b_c2</span><span class="p">,</span>
+                            <span class="n">cm_output_interval</span><span class="o">=</span><span class="n">cm_output_interval</span><span class="p">,</span>
+                            <span class="n">output_cm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">cold_result</span> <span class="o">=</span> <span class="n">cold_detect</span><span class="p">(</span>
+                            <span class="n">img_dates_sorted</span><span class="p">,</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">img_tstack</span><span class="p">[</span><span class="n">pos</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
+                            <span class="n">p_cg</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                            <span class="n">conse</span><span class="o">=</span><span class="n">conse</span><span class="p">,</span>
+                            <span class="n">b_c2</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">pos</span><span class="o">=</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">*</span> <span class="p">(</span><span class="n">original_row</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">original_col</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="c1"># print(f&quot;gap_days has changed&quot;)</span>
+                <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s2">&quot;COLD fails at original_row </span><span class="si">{}</span><span class="s2">, original_col </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">original_row</span><span class="p">,</span>
+                            <span class="n">original_col</span><span class="p">,</span>
+                            <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+                        <span class="n">CM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cm_maps</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">)</span>
+                        <span class="n">CM_date</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cm_maps</span><span class="p">,</span> <span class="o">-</span><span class="mi">9999</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">short</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result_collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cold_result</span><span class="p">)</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+                        <span class="n">CM_collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CM</span><span class="p">)</span>
+                        <span class="n">date_collect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CM_date</span><span class="p">)</span>
+
+            <span class="c1"># save the dataset</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_collect</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                    <span class="n">join</span><span class="p">(</span>
+                        <span class="n">result_path</span><span class="p">,</span>
+                        <span class="s2">&quot;record_change_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">_cold.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">),</span>
+                    <span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">result_collect</span><span class="p">),</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                    <span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;CM_date_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">)),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">date_collect</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                    <span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;CM_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2">.npy&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">)),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">CM_collect</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;COLD_block</span><span class="si">{}</span><span class="s2">_finished.txt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_id</span><span class="p">)),</span> <span class="s2">&quot;w&quot;</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Per-pixel COLD processing is finished for block_x</span><span class="si">{}</span><span class="s2">_y</span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">block_x</span><span class="p">,</span> <span class="n">block_y</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--rank&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the rank id&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--n_cores&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the total cores assigned&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--stack_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the path for stack data&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--result_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the path for storing results&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--yaml_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;YAML path&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--seedmap_path&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;an existing label map path; &quot;</span> <span class="s2">&quot;none means not using thematic info&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--method&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s2">&quot;COLD&quot;</span><span class="p">,</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">,</span> <span class="s2">&quot;SCCDOFFLINE&quot;</span><span class="p">]),</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;COLD, OBCOLD, SCCD-OFFLINE&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--low_datebound&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;low date bound of image selection for processing. &quot;</span> <span class="s2">&quot;Example - 2015-01-01&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--upper_datebound&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;upper date bound of image selection for processing.&quot;</span> <span class="s2">&quot;Example - 2021-12-31&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--b_c2&quot;</span><span class="p">,</span>
+    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;indicate if it is c2 or hls; if so, &quot;</span>
+    <span class="s2">&quot;thermal bands will not be considered for observation selection &quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--seedmap_year&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the year of coefficients to generate classification model. If none, it will use the default from pyxccd/src/python/pyxccd/ob_parameters.yaml&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;--source_dir&quot;</span><span class="p">,</span>
+    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;the folder directory of Landsat tar files &quot;</span> <span class="s2">&quot;downloaded from USGS website&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
+    <span class="n">rank</span><span class="p">,</span>
+    <span class="n">n_cores</span><span class="p">,</span>
+    <span class="n">stack_path</span><span class="p">,</span>
+    <span class="n">result_path</span><span class="p">,</span>
+    <span class="n">yaml_path</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">,</span>
+    <span class="n">seedmap_path</span><span class="p">,</span>
+    <span class="n">low_datebound</span><span class="p">,</span>
+    <span class="n">upper_datebound</span><span class="p">,</span>
+    <span class="n">b_c2</span><span class="p">,</span>
+    <span class="n">seedmap_year</span><span class="p">,</span>
+    <span class="n">source_dir</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="c1"># def main():</span>
+    <span class="c1">#     rank = 29</span>
+    <span class="c1">#     n_cores = 200</span>
+    <span class="c1">#     stack_path = &#39;/gpfs/sharedfs1/zhulab/Jiwon/HLS/Stack/10SEG/10SEG_stack_0.2&#39;</span>
+    <span class="c1">#     result_path = &#39;/scratch/suy20004/suy20004/test&#39;</span>
+    <span class="c1">#     yaml_path = &#39;/home/suy20004/Document/pyxccd-uconnhpc/config_hls.yaml&#39;</span>
+    <span class="c1">#     method = &#39;COLD&#39;</span>
+    <span class="c1">#     seedmap_path = None</span>
+    <span class="c1">#     low_datebound = None</span>
+    <span class="c1">#     upper_datebound = None</span>
+    <span class="c1">#     b_c2 =True</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">low_datebound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">low_datebound</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">low_datebound</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">low_datebound</span><span class="p">)</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">upper_datebound</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">upper_datebound</span> <span class="o">=</span> <span class="mi">999999</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">upper_datebound</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">upper_datebound</span><span class="p">)</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span>
+
+    <span class="c1"># Reading config</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">yaml_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">yaml_obj</span><span class="p">:</span>
+        <span class="n">config_general</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">yaml_obj</span><span class="p">)</span>
+    <span class="n">dataset_info</span> <span class="o">=</span> <span class="n">class_from_dict</span><span class="p">(</span><span class="n">DatasetInfo</span><span class="p">,</span> <span class="n">config_general</span><span class="p">[</span><span class="s2">&quot;DATASETINFO&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">b_c2</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># we need to adjust rows and cols, and make them divisible by block_height and block_width</span>
+        <span class="n">folder_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">-</span> <span class="mi">4</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">source_dir</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.tar&quot;</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">source_dir</span><span class="p">,</span> <span class="s2">&quot;ref_folder&quot;</span><span class="p">)):</span>
+            <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">source_dir</span><span class="p">,</span> <span class="n">folder_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.tar&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">tar_ref</span><span class="p">:</span>
+                <span class="n">tar_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">source_dir</span><span class="p">,</span> <span class="s2">&quot;ref_folder&quot;</span><span class="p">))</span>
+        <span class="n">ref_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">source_dir</span><span class="p">,</span> <span class="s2">&quot;ref_folder&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">folder_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">_SR_B1.TIF&quot;</span><span class="p">)</span>
+        <span class="n">ref_image</span> <span class="o">=</span> <span class="n">rio_loaddata</span><span class="p">(</span><span class="n">ref_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ref_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">ref_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_rows</span> <span class="o">=</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span>
+
+        <span class="k">if</span> <span class="n">ref_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">ref_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">=</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span>
+        <span class="n">dataset_info</span><span class="o">.</span><span class="n">nblocks</span> <span class="o">=</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span>
+        <span class="n">ref_image</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">conse</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config_general</span><span class="p">[</span><span class="s2">&quot;ALGORITHMINFO&quot;</span><span class="p">][</span><span class="s2">&quot;conse&quot;</span><span class="p">])</span>
+    <span class="n">cm_output_interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config_general</span><span class="p">[</span><span class="s2">&quot;ALGORITHMINFO&quot;</span><span class="p">][</span><span class="s2">&quot;CM_OUTPUT_INTERVAL&quot;</span><span class="p">])</span>
+    <span class="n">probability_threshold</span> <span class="o">=</span> <span class="n">config_general</span><span class="p">[</span><span class="s2">&quot;ALGORITHMINFO&quot;</span><span class="p">][</span><span class="s2">&quot;probability_threshold&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">n_cols</span> <span class="o">%</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_width</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_rows</span> <span class="o">%</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">block_height</span> <span class="o">!=</span> <span class="mi">0</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;n_cols, n_rows must be divisible respectively by dataset_info.block_width, dataset_info.block_height! Please double &quot;</span>
+            <span class="s2">&quot;check your config yaml&quot;</span>
+        <span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># we need read &#39;global starting date&#39; to save CM which will be only used for ob-cold</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">starting_date</span><span class="p">,</span> <span class="n">n_cm_maps</span> <span class="o">=</span> <span class="n">reading_start_dates_nmaps</span><span class="p">(</span>
+            <span class="n">stack_path</span><span class="p">,</span> <span class="n">cm_output_interval</span>
+        <span class="p">)</span>
+        <span class="n">year_lowbound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">starting_date</span><span class="p">)</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">year_uppbound</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span>
+            <span class="n">starting_date</span> <span class="o">+</span> <span class="p">(</span><span class="n">n_cm_maps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cm_output_interval</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">year</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;reading start dates errors: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">start_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># logging and folder preparation</span>
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">result_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">result_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;cm_maps&quot;</span><span class="p">)):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;cm_maps&quot;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;The per-pixel time series processing begins: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">start_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">stack_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to locate stack folders. The program ends: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+    <span class="c1">#########################################################################</span>
+    <span class="c1">#                        per-pixel COLD procedure                       #</span>
+    <span class="c1">#########################################################################</span>
+    <span class="c1"># threshold = chi2.ppf(probability_threshold, 5)</span>
+    <span class="n">nblock_eachcore</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">n_cores</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">block_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span>
+    <span class="n">partial_func</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
+        <span class="n">block_tile_processing</span><span class="p">,</span>
+        <span class="n">dataset_info</span><span class="p">,</span>
+        <span class="n">stack_path</span><span class="p">,</span>
+        <span class="n">result_path</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">,</span>
+        <span class="n">n_cm_maps</span><span class="p">,</span>
+        <span class="n">probability_threshold</span><span class="p">,</span>
+        <span class="n">conse</span><span class="p">,</span>
+        <span class="n">b_c2</span><span class="p">,</span>
+        <span class="n">starting_date</span><span class="p">,</span>
+        <span class="n">cm_output_interval</span><span class="p">,</span>
+        <span class="n">low_datebound</span><span class="p">,</span>
+        <span class="n">upper_datebound</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial_func</span><span class="p">,</span> <span class="n">block_list</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="c1"># wait for all cores to be finished</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;OBCOLD&quot;</span><span class="p">:</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">is_finished_cold_blockfinished</span><span class="p">(</span>
+            <span class="n">result_path</span><span class="p">,</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_x</span> <span class="o">*</span> <span class="n">dataset_info</span><span class="o">.</span><span class="n">n_block_y</span>
+        <span class="p">):</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">cold_timepoint</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tileprocessing_report</span><span class="p">(</span>
+            <span class="n">join</span><span class="p">(</span><span class="n">result_path</span><span class="p">,</span> <span class="s2">&quot;tile_processing_report.log&quot;</span><span class="p">),</span>
+            <span class="n">stack_path</span><span class="p">,</span>
+            <span class="n">pyxccd</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+            <span class="n">method</span><span class="p">,</span>
+            <span class="n">dataset_info</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="p">,</span>
+            <span class="n">cold_timepoint</span><span class="p">,</span>
+            <span class="n">TZ</span><span class="p">,</span>
+            <span class="n">n_cores</span><span class="p">,</span>
+            <span class="n">probability_threshold</span><span class="p">,</span>
+            <span class="n">conse</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;The whole procedure finished: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">TZ</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

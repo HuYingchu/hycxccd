@@ -1,0 +1,183 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyxccd Tutorial(English) &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Lesson 0: introduction" href="0_intro.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pyxccd Tutorial(English)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Pyxccd Tutorial(English)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial_en.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyxccd-tutorial-english">
+<h1>Pyxccd Tutorial(English)<a class="headerlink" href="#pyxccd-tutorial-english" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html#preparation">Preparation:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html#learning-pyxccd-with-examples">Learning Pyxccd with Examples:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html#cold-latest-ccdc">COLD (latest CCDC)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html#s-ccd">S-CCD</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#probability-of-change-p-cg">Probability of Change (p_cg)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#conse">Conse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#allowing-for-inputs-from-any-sensor">Allowing for inputs from any sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#trimodal-s-ccd">Trimodal S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#incoporating-evi-into-s-ccd-cold">Incoporating EVI into S-CCD/COLD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#preparation">Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-1-image-stack-processing">Step 1: Image Stack Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-2-change-detection-sccd-cold">Step 2: Change Detection (SCCD &amp; COLD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-3-disturbance-map-generation">Step 3: Disturbance Map Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#important-notes">Important Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#example-output">Example Output</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#greenness-trend-in-tibet-modis">Greenness trend in Tibet (MODIS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#precipitation-seasonality">Precipitation seasonality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#s-ccd-model-fit">S-CCD model fit</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html#detecting-disturbances-using-break">Detecting disturbances using “break”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html#increasing-the-sensitivity-for-detecting-breaks">Increasing the sensitivity for detecting breaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html#solution-anomaly-break-detection-hierachy">Solution: “anomaly-break” detection hierachy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#s-ccd">S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#historical-data-processing">Historical data processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#bi-weekly-recursive-update">Bi-weekly recursive update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#read-and-plot-the-daily-soil-moisture-dataset">Read and plot the daily soil moisture dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#gap-filling-using-s-ccd">gap filling using S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#trying-different-temporal-density">Trying different temporal density</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="0_intro.html" class="btn btn-neutral float-right" title="Lesson 0: introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
