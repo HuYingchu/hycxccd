@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Lesson 2: Parameter selection for S-CCD" href="2_parameter_selection_insect_landsat.html" />
-    <link rel="prev" title="Pyxccd Tutorial(English)" href="tutorial_en.html" /> 
+    <link rel="prev" title="Lesson 0: introduction" href="0_intro.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,7 +44,8 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 1: detecting disturbances using COLD and S-CCD</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#cold-latest-ccdc">COLD (latest CCDC)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#cold-break-detection">COLD Break detection</a></li>
@@ -55,6 +56,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#s-ccd">S-CCD</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#s-ccd-break-detection">S-CCD Break detection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#s-ccd-visualization">S-CCD visualization</a></li>
 </ul>
 </li>
 </ul>
@@ -62,13 +64,13 @@
 <li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning&precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
 <li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -86,7 +88,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
       <li class="breadcrumb-item active">Lesson 1: detecting disturbances using COLD and S-CCD</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/1_break_detection_fire_hls.rst.txt" rel="nofollow"> View page source</a>
@@ -647,7 +649,9 @@ details for this design in Lesson 7.</p>
 <p>The details for using S-CCD for the NRT scenario will be seen in Lesson
 7. For this lesson, we will focus on the S-CCD-based retrospective
 analysis.</p>
-<p>### S-CCD visualization</p>
+</section>
+<section id="s-ccd-visualization">
+<h3>S-CCD visualization<a class="headerlink" href="#s-ccd-visualization" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getcategory_sccd</span><span class="p">,</span> <span class="n">defaults</span>
 
@@ -888,7 +892,7 @@ algorithm parameters to improve sensitivity.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tutorial_en.html" class="btn btn-neutral float-left" title="Pyxccd Tutorial(English)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="0_intro.html" class="btn btn-neutral float-left" title="Lesson 0: introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="2_parameter_selection_insect_landsat.html" class="btn btn-neutral float-right" title="Lesson 2: Parameter selection for S-CCD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

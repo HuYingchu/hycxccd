@@ -605,15 +605,11 @@ Let’s make a quick check for the break type (1-disturbance; 2-recovery)
 Finally, we plot the time-series Landsat images and Planet image of
 April. 15 to confirm the occurrence of disturbance:
 
-.. figure:: attachment:image-2.png
-   :alt: image-2.png
+.. image:: 7_near_realtime_logging_hls_files/image1.png
 
-   image-2.png
 
-.. figure:: attachment:image.png
-   :alt: image.png
+.. image:: 7_near_realtime_logging_hls_files/image.png
 
-   image.png
 
 Week 5-6: no clear observations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

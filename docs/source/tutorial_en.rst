@@ -1,11 +1,10 @@
-Pyxccd Tutorial(English)
+Pyxccd Tutorial (English)
 =======================
 
 .. toctree::
    :maxdepth: 2
    
    0_intro
-   old_1_break_detection_fire_hls
    1_break_detection_fire_hls
    2_parameter_selection_insect_landsat
    3_flexible_inputs_crop_sentinel2

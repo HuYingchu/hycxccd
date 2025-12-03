@@ -593,7 +593,8 @@ The details for using S-CCD for the NRT scenario will be seen in Lesson
 7. For this lesson, we will focus on the S-CCD-based retrospective
 analysis.
 
-### S-CCD visualization
+S-CCD visualization
+~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
