@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 4:detailed steps for detecting disturbance studies using HLS datasets &mdash; pyxccd  documentation</title>
+  <title>Lesson 4: tile-based processing &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Lesson 5: State analysis" href="5_state_analysis_greenning%26precipitation_coarse.html" />
-    <link rel="prev" title="Lesson 3: flexible inputs" href="3_flexible_inputs_crop_sentinel2.html" /> 
+    <link rel="next" title="Lesson 5: state analysis" href="5_state_analysis_greenning&precipitation_coarse.html" />
+    <link rel="prev" title="Lesson 3: flexible mode" href="3_flexible_inputs_crop_sentinel2.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,48 +44,48 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#preparation">Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 4: tile-based processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-0-preparation">Step 0: preparation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#install-pyxccd">1. Install Pyxccd</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#prepare-hls-images">2. Prepare HLS images</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#configuration-file">3. Configuration File</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#step-1-image-stack-processing">Step 1: Image Stack Processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-image-preprocessing">Step 1: image preprocessing</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#purpose">Purpose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#procedure">Procedure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#output">Output</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#step-2-change-detection-sccd-cold">Step 2: Change Detection (SCCD &amp; COLD)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sccd-algorithm">SCCD Algorithm</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cold-algorithm">COLD Algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-break-detection">Step 2: break detection</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sccd-algorithm">SCCD Algorithm:</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cold-algorithm">COLD Algorithm:</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#step-3-disturbance-map-generation">Step 3: Disturbance Map Generation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-disturbance-map-generation">Step 3: disturbance map generation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id9">Purpose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id10">Procedure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id11">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id12">Output</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#interpretation">Interpretation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#important-notes">Important Notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-output">Example Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#result-examples">Result examples</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning&precipitation_coarse.html">Lesson 5: state analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -103,8 +103,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-      <li class="breadcrumb-item active">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+      <li class="breadcrumb-item active">Lesson 4: tile-based processing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/4_tile_processing_general_hls.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -114,13 +114,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="lesson-4-detailed-steps-for-detecting-disturbance-studies-using-hls-datasets">
-<h1>Lesson 4:detailed steps for detecting disturbance studies using HLS datasets<a class="headerlink" href="#lesson-4-detailed-steps-for-detecting-disturbance-studies-using-hls-datasets" title="Link to this heading">¶</a></h1>
+  <section id="lesson-4-tile-based-processing">
+<h1>Lesson 4: tile-based processing<a class="headerlink" href="#lesson-4-tile-based-processing" title="Link to this heading">¶</a></h1>
+<p><strong>Authors: Yingchu Hu, Su Ye</strong></p>
+<p><strong>Time series datasets: Harmonized Landsat-Sentinel (HLS) datasets</strong></p>
+<p><strong>Application: General disturbance mapping, Hangzhou, China</strong></p>
 <p>This tutorial will guide you through processing HLS imagery data using
 pyxccd to generate annual disturbance maps, recent disturbance maps, and
 first disturbance maps. The workflow consists of three main steps.</p>
-<section id="preparation">
-<h2>Preparation<a class="headerlink" href="#preparation" title="Link to this heading">¶</a></h2>
+<section id="step-0-preparation">
+<h2>Step 0: preparation<a class="headerlink" href="#step-0-preparation" title="Link to this heading">¶</a></h2>
 <section id="install-pyxccd">
 <h3>1. Install Pyxccd<a class="headerlink" href="#install-pyxccd" title="Link to this heading">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pyxccd</span>
@@ -147,23 +150,7 @@ contains 6 years of HLS data from 2019-2024):</div>
 <h3>3. Configuration File<a class="headerlink" href="#configuration-file" title="Link to this heading">¶</a></h3>
 <p>Prepare <code class="docutils literal notranslate"><span class="pre">config_hls.yaml</span></code> with adjustable block size parameters
 (example uses 30×30 blocks):</p>
-<style>
-/* 覆盖样式 */
-.output-block .highlight {
-    background: transparent !important;
-    margin-bottom: 0 !important;
-}
-.output-block .highlight pre {
-    background-color: #f0f4ff !important;
-    padding: 0.8em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-/* 添加底部间距 */
-.output-block {
-    margin-bottom: 1.5em !important;
-}
-</style><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">DATASETINFO</span><span class="p">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">DATASETINFO</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">n_rows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span>
 <span class="w">  </span><span class="nt">n_cols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span>
 <span class="w">  </span><span class="nt">n_block_x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
@@ -172,8 +159,8 @@ contains 6 years of HLS data from 2019-2024):</div>
 </div>
 </section>
 </section>
-<section id="step-1-image-stack-processing">
-<h2>Step 1: Image Stack Processing<a class="headerlink" href="#step-1-image-stack-processing" title="Link to this heading">¶</a></h2>
+<section id="step-1-image-preprocessing">
+<h2>Step 1: image preprocessing<a class="headerlink" href="#step-1-image-preprocessing" title="Link to this heading">¶</a></h2>
 <section id="purpose">
 <h3>Purpose<a class="headerlink" href="#purpose" title="Link to this heading">¶</a></h3>
 <p>Stack HLS images in time series for subsequent change detection.</p>
@@ -212,13 +199,13 @@ script:</p></li>
 tile.</p>
 </section>
 </section>
-<section id="step-2-change-detection-sccd-cold">
-<h2>Step 2: Change Detection (SCCD &amp; COLD)<a class="headerlink" href="#step-2-change-detection-sccd-cold" title="Link to this heading">¶</a></h2>
+<section id="step-2-break-detection">
+<h2>Step 2: break detection<a class="headerlink" href="#step-2-break-detection" title="Link to this heading">¶</a></h2>
 <section id="sccd-algorithm">
-<h3>SCCD Algorithm<a class="headerlink" href="#sccd-algorithm" title="Link to this heading">¶</a></h3>
+<h3>SCCD Algorithm:<a class="headerlink" href="#sccd-algorithm" title="Link to this heading">¶</a></h3>
 <section id="id1">
 <h4>Purpose<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
-<p>Detect pixel-level changes using pyxccd’s SCCD algorithm.</p>
+<p>Detect breaks at a per-pixel level using pyxccd’s SCCD algorithm.</p>
 </section>
 <section id="id2">
 <h4>Procedure<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
@@ -254,7 +241,7 @@ tile.</p>
 </section>
 </section>
 <section id="cold-algorithm">
-<h3>COLD Algorithm<a class="headerlink" href="#cold-algorithm" title="Link to this heading">¶</a></h3>
+<h3>COLD Algorithm:<a class="headerlink" href="#cold-algorithm" title="Link to this heading">¶</a></h3>
 <section id="id5">
 <h4>Purpose<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
 <p>Detect pixel-level changes using pyxccd’s COLD algorithm.</p>
@@ -304,7 +291,7 @@ tile.</p>
 </section>
 </section>
 <section id="step-3-disturbance-map-generation">
-<h2>Step 3: Disturbance Map Generation<a class="headerlink" href="#step-3-disturbance-map-generation" title="Link to this heading">¶</a></h2>
+<h2>Step 3: disturbance map generation<a class="headerlink" href="#step-3-disturbance-map-generation" title="Link to this heading">¶</a></h2>
 <section id="id9">
 <h3>Purpose<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <p>Convert change detection results into annual/recent/first disturbance
@@ -354,52 +341,43 @@ python<span class="w"> </span>export_change_map.py<span class="w"> </span>--sour
 <section id="id12">
 <h3>Output<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <p>The output directory (<code class="docutils literal notranslate"><span class="pre">disturbance_maps</span></code> by default) will contain:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">For</span> <span class="n">SCCDOFFLINE</span> <span class="n">method</span><span class="p">:</span>
-<span class="p">{</span><span class="n">year</span><span class="p">}</span><span class="n">_break_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">Annual</span> <span class="n">disturbance</span> <span class="nb">map</span>
-<span class="n">first_disturbance_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">First</span> <span class="n">disturbance</span> <span class="nb">map</span> <span class="p">(</span><span class="n">year</span> <span class="n">of</span> <span class="n">first</span> <span class="n">disturbance</span><span class="p">)</span>
-<span class="n">recent_disturbance_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">Recent</span> <span class="n">disturbance</span> <span class="nb">map</span> <span class="p">(</span><span class="n">year</span> <span class="n">of</span> <span class="n">latest</span> <span class="n">disturbance</span><span class="p">)</span>
-
-<span class="n">For</span> <span class="n">COLD</span> <span class="n">method</span><span class="p">:</span>
-<span class="p">{</span><span class="n">year</span><span class="p">}</span><span class="n">_break_map_COLD</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">Annual</span> <span class="n">disturbance</span> <span class="nb">map</span>
-<span class="n">first_disturbance_map_COLD</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">First</span> <span class="n">disturbance</span> <span class="nb">map</span> <span class="p">(</span><span class="n">year</span> <span class="n">of</span> <span class="n">first</span> <span class="n">disturbance</span><span class="p">)</span>
-<span class="n">recent_disturbance_map_COLD</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">Recent</span> <span class="n">disturbance</span> <span class="nb">map</span> <span class="p">(</span><span class="n">year</span> <span class="n">of</span> <span class="n">latest</span> <span class="n">disturbance</span><span class="p">)</span>
-</pre></div>
+<p>S-CCD:</p>
+<ol class="arabic simple">
+<li><p>{year}_break_map_SCCDOFFLINE.tif: Annual disturbance date and type
+map</p></li>
+</ol>
+<div class="line-block">
+<div class="line">Pixel value = disturbance_type × 1000 + day_of_year</div>
+<div class="line">Disturbance types (S-CCD):</div>
+<div class="line">  1 - Disturbance</div>
+<div class="line">  2 - Recovery</div>
 </div>
-</section>
-<section id="interpretation">
-<h3>Interpretation<a class="headerlink" href="#interpretation" title="Link to this heading">¶</a></h3>
-<section id="annual-disturbance-maps">
-<h4>Annual Disturbance Maps<a class="headerlink" href="#annual-disturbance-maps" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple" start="2">
+<li><p>first_disturbance_map_SCCDOFFLINE.tif: First disturbance map (year
+of first disturbance)</p></li>
+<li><p>recent_disturbance_map_SCCDOFFLINE.tif: Recent disturbance map (year
+of latest disturbance)</p></li>
+</ol>
+<p>COLD:</p>
+<ol class="arabic simple">
+<li><p>{year}_break_map_COLD.tif: Annual disturbance date and type map</p></li>
+</ol>
 <div class="line-block">
 <div class="line">Pixel value = disturbance_type × 1000 + day_of_year</div>
 <div class="line">Disturbance types (COLD):</div>
 <div class="line">  1 - Disturbance</div>
 <div class="line">  2 - Regrowth   3 - Restoration</div>
 </div>
-<div class="line-block">
-<div class="line">Disturbance types (S-CCD):</div>
-<div class="line">  1 - Disturbance</div>
-<div class="line">  2 - Recovery</div>
-</div>
-</section>
-<section id="recent-disturbance-map">
-<h4>Recent Disturbance Map<a class="headerlink" href="#recent-disturbance-map" title="Link to this heading">¶</a></h4>
-<div class="line-block">
-<div class="line">Shows the most recent disturbance year for each pixel</div>
-<div class="line">0 indicates no disturbance</div>
-</div>
-</section>
-<section id="first-disturbance-map">
-<h4>First Disturbance Map<a class="headerlink" href="#first-disturbance-map" title="Link to this heading">¶</a></h4>
-<div class="line-block">
-<div class="line">Shows the first disturbance year for each pixel</div>
-<div class="line">0 indicates no disturbance</div>
-</div>
+<ol class="arabic simple" start="2">
+<li><p>first_disturbance_map_COLD.tif: First disturbance map (year of first
+disturbance)</p></li>
+<li><p>recent_disturbance_map_COLD.tif: Recent disturbance map (year of
+latest disturbance)</p></li>
+</ol>
 </section>
 </section>
-</section>
-<section id="important-notes">
-<h2>Important Notes<a class="headerlink" href="#important-notes" title="Link to this heading">¶</a></h2>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
 <li><p>For large areas, process tiles in batches to avoid memory overload</p></li>
 <li><p>Adjust block size parameters in config_hls.yaml to balance speed and
@@ -408,12 +386,12 @@ memory usage</p></li>
 completed blocks</p></li>
 </ol>
 </section>
-<section id="example-output">
-<h2>Example Output<a class="headerlink" href="#example-output" title="Link to this heading">¶</a></h2>
-<p>2019-2024 First Disturbance Map (COLD):</p>
-<img alt="_images/cold.png" src="_images/cold.png" />
-<p>2019-2024 First Disturbance Map (SCCD):</p>
-<img alt="_images/sccd.png" src="_images/sccd.png" />
+<section id="result-examples">
+<h2>Result examples<a class="headerlink" href="#result-examples" title="Link to this heading">¶</a></h2>
+<p>First Disturbance Map (COLD):</p>
+<p><img alt="image1" src="_images/cold.png" /></p>
+<p>First Disturbance Map (SCCD):</p>
+<p><img alt="image2" src="_images/sccd.png" /></p>
 </section>
 </section>
 
@@ -421,8 +399,8 @@ completed blocks</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="3_flexible_inputs_crop_sentinel2.html" class="btn btn-neutral float-left" title="Lesson 3: flexible inputs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="5_state_analysis_greenning%26precipitation_coarse.html" class="btn btn-neutral float-right" title="Lesson 5: State analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="3_flexible_inputs_crop_sentinel2.html" class="btn btn-neutral float-left" title="Lesson 3: flexible mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="5_state_analysis_greenning&precipitation_coarse.html" class="btn btn-neutral float-right" title="Lesson 5: state analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

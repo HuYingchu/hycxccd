@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 7: near real-time monitoring for forest disturbances &mdash; pyxccd  documentation</title>
+  <title>Lesson 7: near real-time monitoring &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Lesson 8: gap filling" href="8_gapfilling_general_FY3B.html" />
+    <link rel="next" title="Lesson 8: break-aware gap filling" href="8_gapfilling_general_FY3B.html" />
     <link rel="prev" title="Lesson 6: anomalies vs breaks" href="6_anomalies_break_drought_gosif.html" /> 
 </head>
 
@@ -47,14 +47,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: state analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 7: near real-time monitoring for forest disturbances</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#s-ccd">S-CCD</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#historical-data-processing">Historical data processing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 7: near real-time monitoring</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#retrospective-data-processing">Retrospective data processing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bi-weekly-recursive-update">Bi-weekly recursive update</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#week-1-2-found-anomalies">Week 1-2: found anomalies</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#week-3-4-break-detected">Week 3-4: break detected!</a></li>
@@ -66,7 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
@@ -88,7 +87,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
-      <li class="breadcrumb-item active">Lesson 7: near real-time monitoring for forest disturbances</li>
+      <li class="breadcrumb-item active">Lesson 7: near real-time monitoring</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/7_near_realtime_logging_hls.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,52 +97,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="lesson-7-near-real-time-monitoring-for-forest-disturbances">
-<h1>Lesson 7: near real-time monitoring for forest disturbances<a class="headerlink" href="#lesson-7-near-real-time-monitoring-for-forest-disturbances" title="Link to this heading">¶</a></h1>
+  <section id="lesson-7-near-real-time-monitoring">
+<h1>Lesson 7: near real-time monitoring<a class="headerlink" href="#lesson-7-near-real-time-monitoring" title="Link to this heading">¶</a></h1>
 <p><strong>Author: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
 <p><strong>Time series datasets: Harmonized Landsat-Sentinel (HLS) datasets</strong></p>
 <p><strong>Application: logging activities in Sichuan, China</strong></p>
-<section id="s-ccd">
-<h2>S-CCD<a class="headerlink" href="#s-ccd" title="Link to this heading">¶</a></h2>
-<p>Stochastic Continuous Change Detection (S-CCD)[1] incorporates the
+<p><strong>Stochastic Continuous Change Detection (S-CCD)</strong> incorporates the
 Kalman filter which eliminates the need to refit the entire time series
-whenever new data are ingested. Instead, model coefficients (trend and
-seasonal parameters) are updated incrementally in a short-memory manner,
-so the algorithm does not retain the entire historical record. Once an
-observation is assimilated (or discarded), the raw data are no longer
-stored. This design makes the algorithm scalable for near real-time
-applications, where data arrive continuously.</p>
+whenever new data are ingested [1] . Instead, model coefficients (trend
+and seasonal parameters) are updated incrementally in a short-memory
+manner, so the algorithm does not retain the entire historical record.
+Once an observation is assimilated (or discarded), the raw data are no
+longer stored. This design makes the algorithm scalable for near
+real-time applications, where data arrive continuously.</p>
 <p><em>[1] Ye, S., Rogan, J., Zhu, Z., &amp; Eastman, J. R. (2021). A
 near-real-time approach for monitoring forest disturbance using Landsat
 time series: Stochastic continuous change detection. Remote Sensing of
 Environment, 252, 112167.</em></p>
-</section>
 <hr class="docutils" />
-<section id="historical-data-processing">
-<h2>Historical data processing<a class="headerlink" href="#historical-data-processing" title="Link to this heading">¶</a></h2>
+<section id="retrospective-data-processing">
+<h2>Retrospective data processing<a class="headerlink" href="#retrospective-data-processing" title="Link to this heading">¶</a></h2>
 <p>Let’s use an HLS example from Sichuan to NRT monitoring logging
 activities</p>
 <p>To enable an NRT monitoring, we need run <code class="docutils literal notranslate"><span class="pre">sccd_detect</span></code> or
 <code class="docutils literal notranslate"><span class="pre">sccd_detect_flex</span></code> to process historical time-series datasets up to
 the current date. Assuming that we are at the date of “2024-04-04”, we
 first need to process the historical HLS dataset from 2016 to today:</p>
-<style>
-/* 覆盖样式 */
-.output-block .highlight {
-    background: transparent !important;
-    margin-bottom: 0 !important;
-}
-.output-block .highlight pre {
-    background-color: #f0f4ff !important;
-    padding: 0.8em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-/* 添加底部间距 */
-.output-block {
-    margin-bottom: 1.5em !important;
-}
-</style><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
@@ -457,7 +437,23 @@ black body</p></td>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sccd_result</span>
 </pre></div>
 </div>
-<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>SccdOutput(position=1, rec_cg=array([(735625, 736954, 60, [[ 1.48542393e+04, -1.98632324e+02, -4.02296638e+01,  2.51553841e+01, -1.45135765e+01,  9.93953896e+00], [ 8.38789941e+03, -1.07453278e+02, -8.17535400e+01,  4.86201286e+01,  1.21395941e+01, -1.15295398e+00], [ 2.46381088e+02,  9.38574553e-01, -2.61588840e+01,  7.75747833e+01, -2.77891006e+01,  1.91563301e+01], [-4.81553398e+04,  6.92187561e+02, -4.14877747e+02, -2.82666321e+01,  1.99714539e+02, -4.93824234e+01], [ 2.35799585e+03, -1.30108614e+01, -1.74128586e+02,  1.30244141e+02,  2.11633873e+01,  1.98471394e+01], [ 6.30437939e+03, -7.71522598e+01, -5.81244240e+01,  9.30946274e+01, -1.19096756e+01,  1.11940117e+01]], [ 35.270123,  43.48861 ,  45.4437  , 163.38066 ,  83.16016 ,  46.84747 ], [  15.8222275,   26.901932 ,   28.303795 , -266.93457  ,  203.08496  ,  130.46231  ])],
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>SccdOutput(position=1, rec_cg=array([(735625, 736954, 60, [[ 1.48542393e+04, -1.98632324e+02, -4.02296638e+01,  2.51553841e+01, -1.45135765e+01,  9.93953896e+00], [ 8.38789941e+03, -1.07453278e+02, -8.17535400e+01,  4.86201286e+01,  1.21395941e+01, -1.15295398e+00], [ 2.46381088e+02,  9.38574553e-01, -2.61588840e+01,  7.75747833e+01, -2.77891006e+01,  1.91563301e+01], [-4.81553398e+04,  6.92187561e+02, -4.14877747e+02, -2.82666321e+01,  1.99714539e+02, -4.93824234e+01], [ 2.35799585e+03, -1.30108614e+01, -1.74128586e+02,  1.30244141e+02,  2.11633873e+01,  1.98471394e+01], [ 6.30437939e+03, -7.71522598e+01, -5.81244240e+01,  9.30946274e+01, -1.19096756e+01,  1.11940117e+01]], [ 35.270123,  43.48861 ,  45.4437  , 163.38066 ,  83.16016 ,  46.84747 ], [  15.8222275,   26.901932 ,   28.303795 , -266.93457  ,  203.08496  ,  130.46231  ])],
       dtype={&#39;names&#39;: [&#39;t_start&#39;, &#39;t_break&#39;, &#39;num_obs&#39;, &#39;coefs&#39;, &#39;rmse&#39;, &#39;magnitude&#39;], &#39;formats&#39;: [&#39;&lt;i4&#39;, &#39;&lt;i4&#39;, &#39;&lt;i4&#39;, (&#39;&lt;f4&#39;, (6, 6)), (&#39;&lt;f4&#39;, (6,)), (&#39;&lt;f4&#39;, (6,))], &#39;offsets&#39;: [0, 4, 8, 12, 156, 180], &#39;itemsize&#39;: 204, &#39;aligned&#39;: True}), min_rmse=array([ 36,  35,  32, 135,  68,  35], dtype=int16), nrt_mode=1, nrt_model=np.void((13212, 194, [[ 208,  224,  294,  229,  248,  280,    0,    0], [ 429,  454,  497,  452,  489,  505,    0,    0], [ 404,  425,  454,  418,  423,  472,    0,    0], [2312, 2346, 2454, 2387, 2669, 2581,    0,    0], [1459, 1462, 1523, 1503, 1580, 1634,    0,    0], [ 688,  712,  715,  702,  743,  776,    0,    0]], [15212, 15217, 15219, 15222, 15227, 15232,     0,     0], [[102.346245, 0.04497578, -30.347172, 45.64486, -8.82943, 2.1275249, 0.04497578, 0.00013879126, -0.012609219, 0.018866414, -0.0034646979, 0.0018913492, -30.347172, -0.012609219, 119.790405, -5.1260967, -16.251162, 28.159357, 45.64486, 0.018866414, -5.1260967, 140.28548, -30.084187, -27.806128, -8.82943, -0.0034646979, -16.251162, -30.084187, 102.9957, 9.017389, 2.1275249, 0.0018913492, 28.159357, -27.806128, 9.017389, 120.91161], [107.10884, 0.048987884, -31.711811, 47.068657, -8.922271, 1.9123313, 0.048987884, 0.0001462898, -0.013710619, 0.020167004, -0.0035791849, 0.00196249, -31.711811, -0.013710619, 124.05986, -5.503266, -16.729149, 28.45994, 47.068657, 0.020167004, -5.503266, 144.86067, -30.926754, -28.806025, -8.922271, -0.0035791849, -16.729149, -30.926754, 106.99994, 9.354953, 1.9123313, 0.00196249, 28.45994, -28.806025, 9.354953, 124.93636], [119.9631, 0.05424634, -35.35254, 50.44321, -9.054462, 1.158471, 0.05424634, 0.00014838214, -0.014942498, 0.020941857, -0.0033436487, 0.0020050062, -35.35254, -0.014942498, 137.51291, -6.3354993, -18.420902, 29.369724, 50.44321, 0.020941857, -6.3354993, 159.0635, -33.54387, -31.973179, -9.054462, -0.0033436487, -18.420902, -33.54387, 119.844986, 10.4234495, 1.158471, 0.0020050062, 29.369724, -31.973179, 10.4234495, 137.8432], [270.5095, 0.12888381, -75.77823, 84.981155, -12.605128, -4.579196, 0.12888381, 0.00020805227, -0.02948218, 0.027392946, 0.00049356616, 0.007500413, -75.77823, -0.02948218, 265.0389, -15.28049, -37.84924, 37.26224, 84.981155, 0.027392946, -15.28049, 300.24518, -61.682697, -62.50038, -12.605128, 0.00049356616, -37.84924, -61.682697, 243.35031, 22.362244, -4.579196, 0.007500413, 37.26224, -62.50038, 22.362244, 262.02927], [201.3874, 0.0949685, -57.748226, 69.92133, -10.7411785, -2.253249, 0.0949685, 0.00018210562, -0.023727853, 0.025870612, -0.0016557443, 0.004314661, -57.748226, -0.023727853, 210.62979, -11.125076, -29.022526, 33.581055, 69.92133, 0.025870612, -11.125076, 238.27393, -48.60641, -48.75678, -10.7411785, -0.0016557443, -29.022526, -48.60641, 190.04839, 16.61674, -2.253249, 0.004314661, 33.581055, -48.75678, 16.61674, 208.46994], [130.30319, 0.060314957, -38.273083, 53.171722, -9.230985, 0.67056316, 0.060314957, 0.00015543179, -0.016456433, 0.0222466, -0.0032705672, 0.002172302, -38.273083, -0.016456433, 147.19635, -7.0093193, -19.689304, 29.95765, 53.171722, 0.0222466, -7.0093193, 169.38004, -35.444485, -34.178364, -9.230985, -0.0032705672, -19.689304, -35.444485, 129.04063, 11.181543, 0.67056316, 0.002172302, 29.95765, -34.178364, 11.181543, 147.07889]], [[4478.114, -57.458527, -51.625023, 53.003376, -3.087816, -1.4335045], [4847.253, -59.154026, -98.957275, 57.93207, 12.371733, 3.2117136], [7299.53, -94.44655, -39.032204, 108.598015, -24.481653, 3.4193916], [-107754.68, 1496.6321, -470.6851, -155.14989, 133.37932, 76.867035], [31400.36, -405.64944, -218.80751, 180.55144, -4.065642, -7.789848], [25347.256, -334.49185, -84.89389, 142.63063, -19.270958, -13.397055]], [1998.7078, 2154.9038, 2691.485, 10128.377, 6481.8506, 3107.4956], [ 226549,  217558,  310620, 5765251, 1759864,  593911], -9999, -9999, 0), dtype={&#39;names&#39;: [&#39;t_start_since1982&#39;, &#39;num_obs&#39;, &#39;obs&#39;, &#39;obs_date_since1982&#39;, &#39;covariance&#39;, &#39;nrt_coefs&#39;, &#39;H&#39;, &#39;rmse_sum&#39;, &#39;norm_cm&#39;, &#39;cm_angle&#39;, &#39;anomaly_conse&#39;], &#39;formats&#39;: [&#39;&lt;i2&#39;, &#39;&lt;i2&#39;, (&#39;&lt;i2&#39;, (6, 8)), (&#39;&lt;i2&#39;, (8,)), (&#39;&lt;f4&#39;, (6, 36)), (&#39;&lt;f4&#39;, (6, 6)), (&#39;&lt;f4&#39;, (6,)), (&#39;&lt;u4&#39;, (6,)), &#39;&lt;i2&#39;, &#39;&lt;i2&#39;, &#39;u1&#39;], &#39;offsets&#39;: [0, 2, 4, 100, 116, 980, 1124, 1148, 1172, 1174, 1176], &#39;itemsize&#39;: 1180, &#39;aligned&#39;: True}), nrt_queue=array([], dtype=float64))
 </pre></div>
 </div>
@@ -639,8 +635,8 @@ The recent disturbance date is 2024-04-08 00:00:00
 </div>
 <p>Finally, we plot the time-series Landsat images and Planet image of
 April. 15 to confirm the occurrence of disturbance:</p>
-<img alt="_images/image1.png" src="_images/image1.png" />
-<img alt="_images/image.png" src="_images/image.png" />
+<p><img alt="image1" src="_images/image1.png" /></p>
+<p><img alt="image2" src="_images/image2.png" /></p>
 </section>
 <section id="week-5-6-no-clear-observations">
 <h3>Week 5-6: no clear observations<a class="headerlink" href="#week-5-6-no-clear-observations" title="Link to this heading">¶</a></h3>
@@ -799,7 +795,7 @@ Sensing of Environment, 305, 114071.</em></p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="6_anomalies_break_drought_gosif.html" class="btn btn-neutral float-left" title="Lesson 6: anomalies vs breaks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="8_gapfilling_general_FY3B.html" class="btn btn-neutral float-right" title="Lesson 8: gap filling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="8_gapfilling_general_FY3B.html" class="btn btn-neutral float-right" title="Lesson 8: break-aware gap filling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

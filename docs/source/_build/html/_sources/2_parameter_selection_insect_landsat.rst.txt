@@ -1,5 +1,5 @@
-Lesson 2: Parameter selection for S-CCD
-=======================================
+Lesson 2: parameter specification
+=================================
 
 **Author: Su Ye (remotesensingsuy@gmail.com)**
 
@@ -15,8 +15,8 @@ guidance for COLD/S-CCD parameter setting.
 
 --------------
 
-Probability of Change (p_cg)
-----------------------------
+Probability of Change
+---------------------
 
 One of the influential parameter for CCDC-like approaches is Probability
 of Change (``p_cg``). COLD/S-CCD determine a break by combining the
@@ -48,26 +48,6 @@ Colorado, USA, to exemplify disturbance monitoring using S-CCD.
 Default parameters
 ~~~~~~~~~~~~~~~~~~
 
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
-
 .. code:: ipython3
 
     import numpy as np
@@ -93,6 +73,26 @@ Default parameters
 
 
 
+
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
 
 .. code:: text
     :class: output-block
@@ -456,8 +456,8 @@ significantly increasing trend for SWIR2, which confirms that this
 forest pixel was attacked by beetle. The initial lifting signal occurs
 in 2007-ish.
 
-Lowering p_cg
-~~~~~~~~~~~~~
+Adjusting p_cg
+~~~~~~~~~~~~~~
 
 Now we tried to detect the break by adjusting ``p_cg`` to a lower value.
 The parameter ``p_cg``, which represents the chi-square probability for
@@ -482,19 +482,19 @@ based upon rule sets), and therefore marked with a red line.
 .. image:: 2_parameter_selection_insect_landsat_files/2_parameter_selection_insect_landsat_7_0.png
 
 
-Conse
------
+Number of consecutive observations
+----------------------------------
 
 Another important parameter for S-CCD/COLD is the number of consecutive
-observation that deviated from the predicted value with change magnitude
-over the threshold, i.e., ``conse``. ``Conse`` sometime is also named as
-**the width of peek window**. The default value for ``conse`` is 6,
-meaning that a break is identified only when at least six consecutive
-break observations for a peek window were identified, each causing
-spectral change magnitude larger than the critical value of the
-chi-square distribution at the probability ``p_cg``. If the disturbances
-is short-lived and recovered soon (such as drought, flood), then S-CCD
-may miss the break as ``conse=6`` is not satified.
+observations that deviated from the predicted value with change
+magnitude over the threshold, i.e., ``conse``. ``Conse`` sometime is
+also named as **the width of peek window**. The default value for
+``conse`` is 6, meaning that a break is identified only when at least
+six consecutive break observations for a peek window were identified,
+each causing spectral change magnitude larger than the critical value of
+the chi-square distribution at the probability ``p_cg``. If the
+disturbances is short-lived and recovered soon (such as drought, flood),
+then S-CCD may miss the break as ``conse=6`` is not satified.
 
 The spongy moth (SM) is such a ephemeral defoliating insect native to
 Europe and Asia, and was accidentally introduced into Massachusetts in
@@ -548,8 +548,8 @@ parts). 2) it is visual from time series for that there is an NIR
 decrease in 2017, but due to the duration of the disturbance is too
 short, S-CCD fails to detect it.
 
-Lowering conse
-~~~~~~~~~~~~~~
+Adjusting conse
+~~~~~~~~~~~~~~~
 
 Let’s adjust the conse:
 
@@ -596,8 +596,8 @@ available.
     The second digit of nrt_mode is 2
     
 
-Conclusion
-----------
+Summary
+-------
 
 Reducing ``conse`` and ``p_cg`` improves the sensitivity of break
 detection, as fewer consecutive outlier observations or lower

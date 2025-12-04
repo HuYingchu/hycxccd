@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 5: State analysis &mdash; pyxccd  documentation</title>
+  <title>Lesson 5: state analysis &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Lesson 6: anomalies vs breaks" href="6_anomalies_break_drought_gosif.html" />
-    <link rel="prev" title="Lesson 4:detailed steps for detecting disturbance studies using HLS datasets" href="4_tile_processing_general_hls.html" /> 
+    <link rel="prev" title="Lesson 4: tile-based processing" href="4_tile_processing_general_hls.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,14 +45,14 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 5: State analysis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#greenness-trend-in-tibet-modis">Greenness trend in Tibet (MODIS)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 5: state analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#greenning-trend-analysis">Greenning trend analysis</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#finding-the-turning-point">Finding the turning point</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#summary-1">Summary 1</a></li>
 </ul>
@@ -65,11 +65,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -87,8 +87,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-      <li class="breadcrumb-item active">Lesson 5: State analysis</li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+      <li class="breadcrumb-item active">Lesson 5: state analysis</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/5_state_analysis_greenning&amp;precipitation_coarse.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -99,7 +99,7 @@
            <div itemprop="articleBody">
              
   <section id="lesson-5-state-analysis">
-<h1>Lesson 5: State analysis<a class="headerlink" href="#lesson-5-state-analysis" title="Link to this heading">¶</a></h1>
+<h1>Lesson 5: state analysis<a class="headerlink" href="#lesson-5-state-analysis" title="Link to this heading">¶</a></h1>
 <p><strong>Author: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
 <p><strong>Time series datasets: MODIS &amp; GPCP</strong></p>
 <p><strong>Application: greenning and precipitation seasonality</strong></p>
@@ -144,25 +144,9 @@ near-real-time approach for monitoring forest disturbance using Landsat
 time series: Stochastic continuous change detection. Remote Sensing of
 Environment, 252, 112167.</em></p>
 <hr class="docutils" />
-<section id="greenness-trend-in-tibet-modis">
-<h2>Greenness trend in Tibet (MODIS)<a class="headerlink" href="#greenness-trend-in-tibet-modis" title="Link to this heading">¶</a></h2>
-<style>
-/* 覆盖样式 */
-.output-block .highlight {
-    background: transparent !important;
-    margin-bottom: 0 !important;
-}
-.output-block .highlight pre {
-    background-color: #f0f4ff !important;
-    padding: 0.8em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-/* 添加底部间距 */
-.output-block {
-    margin-bottom: 1.5em !important;
-}
-</style><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<section id="greenning-trend-analysis">
+<h2>Greenning trend analysis<a class="headerlink" href="#greenning-trend-analysis" title="Link to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">parser</span>
@@ -191,7 +175,23 @@ Environment, 252, 112167.</em></p>
 <span class="nb">print</span><span class="p">(</span><span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>---------------------------------------------------------------------------
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>---------------------------------------------------------------------------
 
 ValueError                                Traceback (most recent call last)
 
@@ -631,25 +631,30 @@ measurements.</p>
 </section>
 <section id="s-ccd-model-fit">
 <h2>S-CCD model fit<a class="headerlink" href="#s-ccd-model-fit" title="Link to this heading">¶</a></h2>
-<p>S-CCD provides three approaches for model fitting: (1) directly summing
-all state components; (2) applying LASSO regression using all
-observations within a segment (<code class="docutils literal notranslate"><span class="pre">fitting_coefs=True</span></code>); and (3) adopting
-time-specific harmonic model coefficients estimated at the last model
-through the Kalman filter (<code class="docutils literal notranslate"><span class="pre">fitting_coefs=False</span></code>).</p>
-<p>In general, summing all states (the first approach) offers the most
-effective means of capturing local fluctuations in the time series and
-therefore yields the lowest RMSE. Applying LASSO regression (the second
-approach) corresponds to the coefficient-generation strategy used in the
+<p>Traditionally, curve fitting does not account for temporal breaks, which
+can degrade model performance. S-CCD addresses this limitation by
+providing three approaches for break-aware model fitting:</p>
+<ol class="arabic simple">
+<li><p>directly summing all state components;</p></li>
+<li><p>applying LASSO regression using all observations within a segment
+(<code class="docutils literal notranslate"><span class="pre">fitting_coefs=True</span></code>);</p></li>
+<li><p>adopting time-specific harmonic model coefficients estimated at the
+last model through the Kalman filter (<code class="docutils literal notranslate"><span class="pre">fitting_coefs=False</span></code>).</p></li>
+</ol>
+<p>In general, summing all states (Approach 1) offers the most effective
+means of capturing local fluctuations in the time series and therefore
+yields the lowest RMSE. Applying LASSO regression (Approach 2)
+corresponds to the coefficient-generation strategy used in the
 traditional CCDC algorithm and provides the best generalization
 capability, as it outputs only eight coefficients that can serve as
 shape parameters for machine learning inputs. Using time-specific
-harmonic model coefficients (the third approach) reflects model behavior
-only at the most recent observations and may lead to underfitting for
-earlier portions of the time series. This approach is particularly
-suitable for near-real-time monitoring applications, where the primary
-focus is on detecting and characterizing recent disturbances.</p>
-<p>The below are the examples for fitting comparison using the
-precipitation datasets:</p>
+harmonic model coefficients (Approach 3) reflects model behavior only at
+the most recent observations and may lead to underfitting in earlier
+portions of the time series. This approach is particularly suitable for
+near-real-time monitoring applications, where the primary focus is on
+detecting and characterizing recent disturbances.</p>
+<p>The below are the examples for comparing different fitting approaches
+using the precipitation datasets:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span><span class="p">,</span> <span class="n">cold_rec_cg</span><span class="p">,</span> <span class="n">anomaly</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line2D</span>
 
@@ -955,7 +960,7 @@ precipitation datasets:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="4_tile_processing_general_hls.html" class="btn btn-neutral float-left" title="Lesson 4:detailed steps for detecting disturbance studies using HLS datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4_tile_processing_general_hls.html" class="btn btn-neutral float-left" title="Lesson 4: tile-based processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="6_anomalies_break_drought_gosif.html" class="btn btn-neutral float-right" title="Lesson 6: anomalies vs breaks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -1,12 +1,18 @@
-Lesson 4:detailed steps for detecting disturbance studies using HLS datasets
-============================================================================
+Lesson 4: tile-based processing
+===============================
+
+**Authors: Yingchu Hu, Su Ye**
+
+**Time series datasets: Harmonized Landsat-Sentinel (HLS) datasets**
+
+**Application: General disturbance mapping, Hangzhou, China**
 
 This tutorial will guide you through processing HLS imagery data using
 pyxccd to generate annual disturbance maps, recent disturbance maps, and
 first disturbance maps. The workflow consists of three main steps.
 
-Preparation
------------
+Step 0: preparation
+-------------------
 
 1. Install Pyxccd
 ~~~~~~~~~~~~~~~~~
@@ -37,26 +43,6 @@ Preparation
 Prepare ``config_hls.yaml`` with adjustable block size parameters
 (example uses 30×30 blocks):
 
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
-
 .. code:: yaml
 
    DATASETINFO:
@@ -65,8 +51,8 @@ Prepare ``config_hls.yaml`` with adjustable block size parameters
      n_block_x: 30
      n_block_y: 30
 
-Step 1: Image Stack Processing
-------------------------------
+Step 1: image preprocessing
+---------------------------
 
 Purpose
 ~~~~~~~
@@ -109,16 +95,16 @@ The output directory (``stack`` by default) will contain
 ``{TileID}_stack`` folders with block-organized stacked data for each
 tile.
 
-Step 2: Change Detection (SCCD & COLD)
---------------------------------------
+Step 2: break detection
+-----------------------
 
-SCCD Algorithm
-~~~~~~~~~~~~~~
+SCCD Algorithm:
+~~~~~~~~~~~~~~~
 
 Purpose
 ^^^^^^^
 
-Detect pixel-level changes using pyxccd’s SCCD algorithm.
+Detect breaks at a per-pixel level using pyxccd’s SCCD algorithm.
 
 Procedure
 ^^^^^^^^^
@@ -155,8 +141,8 @@ The output directory (``sccd_results`` by default) will contain:
    record_change_x{blockX}_y{blockY}_sccd.npy: Change detection results per block
    SCCD_block{blockID}_finished.txt: Completion marker files
 
-COLD Algorithm
-~~~~~~~~~~~~~~
+COLD Algorithm:
+~~~~~~~~~~~~~~~
 
 Purpose
 ^^^^^^^
@@ -210,7 +196,7 @@ The output directory (``cold_results`` by default) will contain:
    record_change_x{blockX}_y{blockY}_cold.npy: Change detection results per block
    COLD_block{blockID}_finished.txt: Completion marker files
 
-Step 3: Disturbance Map Generation
+Step 3: disturbance map generation
 ----------------------------------
 
 Purpose
@@ -269,47 +255,39 @@ Output
 
 The output directory (``disturbance_maps`` by default) will contain:
 
-::
+S-CCD:
 
-   For SCCDOFFLINE method:
-   {year}_break_map_SCCDOFFLINE.tif: Annual disturbance map
-   first_disturbance_map_SCCDOFFLINE.tif: First disturbance map (year of first disturbance)
-   recent_disturbance_map_SCCDOFFLINE.tif: Recent disturbance map (year of latest disturbance)
+(1) {year}_break_map_SCCDOFFLINE.tif: Annual disturbance date and type
+    map
 
-   For COLD method:
-   {year}_break_map_COLD.tif: Annual disturbance map
-   first_disturbance_map_COLD.tif: First disturbance map (year of first disturbance)
-   recent_disturbance_map_COLD.tif: Recent disturbance map (year of latest disturbance)
+| Pixel value = disturbance_type × 1000 + day_of_year
+| Disturbance types (S-CCD):
+|   1 - Disturbance
+|   2 - Recovery
 
-Interpretation
-~~~~~~~~~~~~~~
+(2) first_disturbance_map_SCCDOFFLINE.tif: First disturbance map (year
+    of first disturbance)
 
-Annual Disturbance Maps
-^^^^^^^^^^^^^^^^^^^^^^^
+(3) recent_disturbance_map_SCCDOFFLINE.tif: Recent disturbance map (year
+    of latest disturbance)
+
+COLD:
+
+(1) {year}_break_map_COLD.tif: Annual disturbance date and type map
 
 | Pixel value = disturbance_type × 1000 + day_of_year
 | Disturbance types (COLD):
 |   1 - Disturbance
 |   2 - Regrowth   3 - Restoration
 
-| Disturbance types (S-CCD):
-|   1 - Disturbance
-|   2 - Recovery
+(2) first_disturbance_map_COLD.tif: First disturbance map (year of first
+    disturbance)
 
-Recent Disturbance Map
-^^^^^^^^^^^^^^^^^^^^^^
+(3) recent_disturbance_map_COLD.tif: Recent disturbance map (year of
+    latest disturbance)
 
-| Shows the most recent disturbance year for each pixel
-| 0 indicates no disturbance
-
-First Disturbance Map
-^^^^^^^^^^^^^^^^^^^^^
-
-| Shows the first disturbance year for each pixel
-| 0 indicates no disturbance
-
-Important Notes
----------------
+Notes
+-----
 
 1. For large areas, process tiles in batches to avoid memory overload
 2. Adjust block size parameters in config_hls.yaml to balance speed and
@@ -317,16 +295,16 @@ Important Notes
 3. Interrupted processing can be resumed - the script will skip
    completed blocks
 
-Example Output
---------------
+Result examples
+---------------
 
-2019-2024 First Disturbance Map (COLD):
+First Disturbance Map (COLD):
 
-.. image:: 4_tile_processing_general_hls_files/cold.png
+|image1|
 
-2019-2024 First Disturbance Map (SCCD):
+First Disturbance Map (SCCD):
 
-.. image:: 4_tile_processing_general_hls_files/sccd.png
+|image2|
 
-
-
+.. |image1| image:: cold.png
+.. |image2| image:: sccd.png

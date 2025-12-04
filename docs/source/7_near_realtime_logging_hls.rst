@@ -1,5 +1,5 @@
-Lesson 7: near real-time monitoring for forest disturbances
-===========================================================
+Lesson 7: near real-time monitoring
+===================================
 
 **Author: Su Ye (remotesensingsuy@gmail.com)**
 
@@ -7,17 +7,14 @@ Lesson 7: near real-time monitoring for forest disturbances
 
 **Application: logging activities in Sichuan, China**
 
-S-CCD
------
-
-Stochastic Continuous Change Detection (S-CCD)[1] incorporates the
+**Stochastic Continuous Change Detection (S-CCD)** incorporates the
 Kalman filter which eliminates the need to refit the entire time series
-whenever new data are ingested. Instead, model coefficients (trend and
-seasonal parameters) are updated incrementally in a short-memory manner,
-so the algorithm does not retain the entire historical record. Once an
-observation is assimilated (or discarded), the raw data are no longer
-stored. This design makes the algorithm scalable for near real-time
-applications, where data arrive continuously.
+whenever new data are ingested [1] . Instead, model coefficients (trend
+and seasonal parameters) are updated incrementally in a short-memory
+manner, so the algorithm does not retain the entire historical record.
+Once an observation is assimilated (or discarded), the raw data are no
+longer stored. This design makes the algorithm scalable for near
+real-time applications, where data arrive continuously.
 
 *[1] Ye, S., Rogan, J., Zhu, Z., & Eastman, J. R. (2021). A
 near-real-time approach for monitoring forest disturbance using Landsat
@@ -26,8 +23,8 @@ Environment, 252, 112167.*
 
 --------------
 
-Historical data processing
---------------------------
+Retrospective data processing
+-----------------------------
 
 Let’s use an HLS example from Sichuan to NRT monitoring logging
 activities
@@ -36,26 +33,6 @@ To enable an NRT monitoring, we need run ``sccd_detect`` or
 ``sccd_detect_flex`` to process historical time-series datasets up to
 the current date. Assuming that we are at the date of “2024-04-04”, we
 first need to process the historical HLS dataset from 2016 to today:
-
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
 
 .. code:: ipython3
 
@@ -365,6 +342,26 @@ Let’s print the relevant ``nrt_model`` information at the current stage:
 
 
 
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
+
 .. code:: text
     :class: output-block
 
@@ -605,11 +602,12 @@ Let’s make a quick check for the break type (1-disturbance; 2-recovery)
 Finally, we plot the time-series Landsat images and Planet image of
 April. 15 to confirm the occurrence of disturbance:
 
-.. image:: 7_near_realtime_logging_hls_files/image1.png
+|image1|
 
+|image2|
 
-.. image:: 7_near_realtime_logging_hls_files/image.png
-
+.. |image1| image:: image1.png
+.. |image2| image:: image2.png
 
 Week 5-6: no clear observations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

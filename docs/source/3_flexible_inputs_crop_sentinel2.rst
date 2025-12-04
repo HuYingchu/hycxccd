@@ -1,5 +1,5 @@
-Lesson 3: flexible inputs
-=========================
+Lesson 3: flexible mode
+=======================
 
 **Author: Su Ye (remotesensingsuy@gmail.com)**
 
@@ -15,32 +15,12 @@ series.
 
 --------------
 
-Allowing for inputs from any sensor
------------------------------------
+Inputs from sensors other than Landsat
+--------------------------------------
 
 Taking monitoring crop dynamics as an case, let’s use Sentinel-2 as an
 input. We will start from inputting all Sentinel-2 bands for
 ``cold_detect_flex`` and ``sccd_detect_flex``:
-
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
 
 .. code:: ipython3
 
@@ -541,8 +521,8 @@ four-month cycle and achieve better curve fitting for cropland pixels**.
 As shown above, the fitting curves produced by S-CCD and COLD are nearly
 identical, and both methods yielded the same break-detection results.
 
-Incoporating EVI into S-CCD/COLD
---------------------------------
+Incoporating vegetation indices
+-------------------------------
 
 Sometimes, relying solely on all original Sentinel-2 spectral bands as
 inputs did not produce satisfactory break-detection performance. In the
@@ -552,25 +532,16 @@ vegetation indices can enhance the results.
 Inputting vegetation indices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The sentinel-2 MSI covering 13 spectral bands, which are denoted as:
-
-======================== ================== ==============
-Sentinel-2 Bands         Central Wavelength Resolution (m)
-======================== ================== ==============
-Band 1 - Coastal aerosol 0.443              60
-Band 2 - Blue            0.490              10
-Band 3 - Green           0.560              10
-Band 4 - Red             0.665              10
-Band 5 - Red Edge        0.705              20
-Band 6 - Red Edge        0.740              20
-Band 7 - Red Edge        0.783              20
-Band 8 - NIR             0.842              10
-Band 8A - Red Edge       0.865              20
-Band 9 - Water vapour    0.945              60
-Band 10 - SWIR-Cirrus    1.375              60
-Band 11 - SWIR           1.610              20
-Band 12 - SWIR           2.190              20
-======================== ================== ==============
+The sentinel-2 MSI covering 13 spectral bands, which are denoted as: \|
+Sentinel-2 Bands\| Central Wavelength \| Resolution (m) \| \| :——- \|
+:——: \| ——-: \| \| Band 1 - Coastal aerosol \| 0.443 \| 60 \| \| Band 2
+- Blue \| 0.490 \| 10 \| \| Band 3 - Green \| 0.560 \| 10 \| \| Band 4 -
+Red \| 0.665 \| 10 \| \| Band 5 - Red Edge \| 0.705 \| 20 \| \| Band 6 -
+Red Edge \| 0.740 \| 20 \| \| Band 7 - Red Edge \| 0.783 \| 20 \| \|
+Band 8 - NIR \| 0.842 \| 10 \| \| Band 8A - Red Edge \| 0.865 \| 20 \|
+\| Band 9 - Water vapour \| 0.945 \| 60 \| \| Band 10 - SWIR-Cirrus \|
+1.375 \| 60 \| \| Band 11 - SWIR \| 1.610 \| 20 \| \| Band 12 - SWIR \|
+2.190 \| 20 \|
 
 For agricultural monitoring, the Enhanced Vegetation Index (EVI) is
 widely used to capture crop growth dynamics and vegetation physiological
@@ -607,8 +578,8 @@ and ``sccd_detect_flex``:
 .. image:: 3_flexible_inputs_crop_sentinel2_files/3_flexible_inputs_crop_sentinel2_5_0.png
 
 
-Conclusion
-----------
+Summary
+-------
 
 While adding EVI did not change break detection result for this case, we
 generally recommend incorporating EVI or NDVI as additional inputs for

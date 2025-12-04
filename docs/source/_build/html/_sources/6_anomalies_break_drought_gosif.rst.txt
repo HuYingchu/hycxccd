@@ -7,7 +7,7 @@ Lesson 6: anomalies vs breaks
 
 **Application: agricultural drought in Rajasthan, India**
 
-Solar-Induced Chlorophyll Fluorescence (SIF) is a very faint light
+**Solar-Induced Chlorophyll Fluorescence (SIF)** is a very faint light
 emitted by chlorophyll molecules in plants during photosynthesis. When
 chlorophyll absorbs sunlight (photosynthetically active radiation, or
 PAR), a small fraction (about 1–2%) of the absorbed light is re-emitted
@@ -49,26 +49,6 @@ reanalysis data. Remote Sensing, 11(5), 517.*
 
 Detecting disturbances using “break”
 ------------------------------------
-
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
 
 .. code:: ipython3
 
@@ -699,6 +679,26 @@ Sensing of Environment, 305, 114071.
 
     print(anomaly)
 
+
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
 
 .. code:: text
     :class: output-block

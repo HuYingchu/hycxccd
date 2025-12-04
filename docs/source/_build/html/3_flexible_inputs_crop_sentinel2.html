@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 3: flexible inputs &mdash; pyxccd  documentation</title>
+  <title>Lesson 3: flexible mode &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Lesson 4:detailed steps for detecting disturbance studies using HLS datasets" href="4_tile_processing_general_hls.html" />
-    <link rel="prev" title="Lesson 2: Parameter selection for S-CCD" href="2_parameter_selection_insect_landsat.html" /> 
+    <link rel="next" title="Lesson 4: tile-based processing" href="4_tile_processing_general_hls.html" />
+    <link rel="prev" title="Lesson 2: parameter specification" href="2_parameter_selection_insect_landsat.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,27 +44,28 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 3: flexible inputs</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#allowing-for-inputs-from-any-sensor">Allowing for inputs from any sensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 3: flexible mode</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#inputs-from-sensors-other-than-landsat">Inputs from sensors other than Landsat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trimodal-s-ccd">Trimodal S-CCD</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#incoporating-evi-into-s-ccd-cold">Incoporating EVI into S-CCD/COLD</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#incoporating-vegetation-indices">Incoporating vegetation indices</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#inputting-vegetation-indices">Inputting vegetation indices</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning&precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: state analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -82,8 +83,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-      <li class="breadcrumb-item active">Lesson 3: flexible inputs</li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+      <li class="breadcrumb-item active">Lesson 3: flexible mode</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/3_flexible_inputs_crop_sentinel2.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -93,8 +94,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="lesson-3-flexible-inputs">
-<h1>Lesson 3: flexible inputs<a class="headerlink" href="#lesson-3-flexible-inputs" title="Link to this heading">¶</a></h1>
+  <section id="lesson-3-flexible-mode">
+<h1>Lesson 3: flexible mode<a class="headerlink" href="#lesson-3-flexible-mode" title="Link to this heading">¶</a></h1>
 <p><strong>Author: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
 <p><strong>Time series datasets: Sentinel-2</strong></p>
 <p><strong>Application: crop dynamics in Henan, China</strong></p>
@@ -104,28 +105,12 @@ inputs. <code class="docutils literal notranslate"><span class="pre">pyxccd</spa
 for inputting any combination of bands, index or multisensor time
 series.</p>
 <hr class="docutils" />
-<section id="allowing-for-inputs-from-any-sensor">
-<h2>Allowing for inputs from any sensor<a class="headerlink" href="#allowing-for-inputs-from-any-sensor" title="Link to this heading">¶</a></h2>
+<section id="inputs-from-sensors-other-than-landsat">
+<h2>Inputs from sensors other than Landsat<a class="headerlink" href="#inputs-from-sensors-other-than-landsat" title="Link to this heading">¶</a></h2>
 <p>Taking monitoring crop dynamics as an case, let’s use Sentinel-2 as an
 input. We will start from inputting all Sentinel-2 bands for
 <code class="docutils literal notranslate"><span class="pre">cold_detect_flex</span></code> and <code class="docutils literal notranslate"><span class="pre">sccd_detect_flex</span></code>:</p>
-<style>
-/* 覆盖样式 */
-.output-block .highlight {
-    background: transparent !important;
-    margin-bottom: 0 !important;
-}
-.output-block .highlight pre {
-    background-color: #f0f4ff !important;
-    padding: 0.8em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-/* 添加底部间距 */
-.output-block {
-    margin-bottom: 1.5em !important;
-}
-</style><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -610,77 +595,24 @@ four-month cycle and achieve better curve fitting for cropland pixels</strong>.<
 <p>As shown above, the fitting curves produced by S-CCD and COLD are nearly
 identical, and both methods yielded the same break-detection results.</p>
 </section>
-<section id="incoporating-evi-into-s-ccd-cold">
-<h2>Incoporating EVI into S-CCD/COLD<a class="headerlink" href="#incoporating-evi-into-s-ccd-cold" title="Link to this heading">¶</a></h2>
+<section id="incoporating-vegetation-indices">
+<h2>Incoporating vegetation indices<a class="headerlink" href="#incoporating-vegetation-indices" title="Link to this heading">¶</a></h2>
 <p>Sometimes, relying solely on all original Sentinel-2 spectral bands as
 inputs did not produce satisfactory break-detection performance. In the
 following section, we will examine whether combining spectral bands with
 vegetation indices can enhance the results.</p>
 <section id="inputting-vegetation-indices">
 <h3>Inputting vegetation indices<a class="headerlink" href="#inputting-vegetation-indices" title="Link to this heading">¶</a></h3>
-<p>The sentinel-2 MSI covering 13 spectral bands, which are denoted as:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Sentinel-2 Bands</p></th>
-<th class="head"><p>Central Wavelength</p></th>
-<th class="head"><p>Resolution (m)</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Band 1 - Coastal aerosol</p></td>
-<td><p>0.443</p></td>
-<td><p>60</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 2 - Blue</p></td>
-<td><p>0.490</p></td>
-<td><p>10</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 3 - Green</p></td>
-<td><p>0.560</p></td>
-<td><p>10</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 4 - Red</p></td>
-<td><p>0.665</p></td>
-<td><p>10</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 5 - Red Edge</p></td>
-<td><p>0.705</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 6 - Red Edge</p></td>
-<td><p>0.740</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 7 - Red Edge</p></td>
-<td><p>0.783</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 8 - NIR</p></td>
-<td><p>0.842</p></td>
-<td><p>10</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 8A - Red Edge</p></td>
-<td><p>0.865</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 9 - Water vapour</p></td>
-<td><p>0.945</p></td>
-<td><p>60</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 10 - SWIR-Cirrus</p></td>
-<td><p>1.375</p></td>
-<td><p>60</p></td>
-</tr>
-<tr class="row-odd"><td><p>Band 11 - SWIR</p></td>
-<td><p>1.610</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-even"><td><p>Band 12 - SWIR</p></td>
-<td><p>2.190</p></td>
-<td><p>20</p></td>
-</tr>
-</tbody>
-</table>
+<p>The sentinel-2 MSI covering 13 spectral bands, which are denoted as: |
+Sentinel-2 Bands| Central Wavelength | Resolution (m) | | :——- |
+:——: | ——-: | | Band 1 - Coastal aerosol | 0.443 | 60 | | Band 2
+- Blue | 0.490 | 10 | | Band 3 - Green | 0.560 | 10 | | Band 4 -
+Red | 0.665 | 10 | | Band 5 - Red Edge | 0.705 | 20 | | Band 6 -
+Red Edge | 0.740 | 20 | | Band 7 - Red Edge | 0.783 | 20 | |
+Band 8 - NIR | 0.842 | 10 | | Band 8A - Red Edge | 0.865 | 20 |
+| Band 9 - Water vapour | 0.945 | 60 | | Band 10 - SWIR-Cirrus |
+1.375 | 60 | | Band 11 - SWIR | 1.610 | 20 | | Band 12 - SWIR |
+2.190 | 20 |</p>
 <p>For agricultural monitoring, the Enhanced Vegetation Index (EVI) is
 widely used to capture crop growth dynamics and vegetation physiological
 status. In this experiment, we selected five original Sentinel-2
@@ -711,8 +643,8 @@ and <code class="docutils literal notranslate"><span class="pre">sccd_detect_fle
 <img alt="_images/3_flexible_inputs_crop_sentinel2_5_0.png" src="_images/3_flexible_inputs_crop_sentinel2_5_0.png" />
 </section>
 </section>
-<section id="conclusion">
-<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
 <p>While adding EVI did not change break detection result for this case, we
 generally recommend incorporating EVI or NDVI as additional inputs for
 COLD or S-CCD to enhance cropland monitoring. Beyond improving the
@@ -729,8 +661,8 @@ model for crop phenology monitoring will be demonstrated in Lesson 9
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="2_parameter_selection_insect_landsat.html" class="btn btn-neutral float-left" title="Lesson 2: Parameter selection for S-CCD" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="4_tile_processing_general_hls.html" class="btn btn-neutral float-right" title="Lesson 4:detailed steps for detecting disturbance studies using HLS datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="2_parameter_selection_insect_landsat.html" class="btn btn-neutral float-left" title="Lesson 2: parameter specification" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4_tile_processing_general_hls.html" class="btn btn-neutral float-right" title="Lesson 4: tile-based processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

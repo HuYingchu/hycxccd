@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson 8: gap filling &mdash; pyxccd  documentation</title>
+  <title>Lesson 8: break-aware gap filling &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -18,8 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pyxccd指南(Chinese)" href="tutorial_ch.html" />
-    <link rel="prev" title="Lesson 7: near real-time monitoring for forest disturbances" href="7_near_realtime_logging_hls.html" /> 
+    <link rel="next" title="Pyxccd指南 (Chinese)" href="tutorial_ch.html" />
+    <link rel="prev" title="Lesson 7: near real-time monitoring" href="7_near_realtime_logging_hls.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,23 +44,24 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning&precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: state analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 8: gap filling</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#read-and-plot-the-daily-soil-moisture-dataset">Read and plot the daily soil moisture dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#gap-filling-using-s-ccd">gap filling using S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 8: break-aware gap filling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#daily-soil-moisture-dataset">Daily soil moisture dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gap-filling-for-sampled-time-series">Gap filling for sampled time series</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trying-different-temporal-density">Trying different temporal density</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -78,8 +79,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-      <li class="breadcrumb-item active">Lesson 8: gap filling</li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+      <li class="breadcrumb-item active">Lesson 8: break-aware gap filling</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/8_gapfilling_general_FY3B.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -89,8 +90,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="lesson-8-gap-filling">
-<h1>Lesson 8: gap filling<a class="headerlink" href="#lesson-8-gap-filling" title="Link to this heading">¶</a></h1>
+  <section id="lesson-8-break-aware-gap-filling">
+<h1>Lesson 8: break-aware gap filling<a class="headerlink" href="#lesson-8-break-aware-gap-filling" title="Link to this heading">¶</a></h1>
 <p><strong>Author: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
 <p><strong>Time series datasets: FY3B soil moisture</strong></p>
 <p><strong>Application: Henan, China</strong></p>
@@ -114,37 +115,23 @@ their relative performance.</p>
 X. (2025). A TCN-Transformer Parallel model for reconstruction of a
 global, daily, spatially seamless FY-3B soil moisture dataset. Remote
 Sensing of Environment, 328, 114841.</em></p>
-<p><strong>S-CCD model fit</strong> We will use S-CCD model fit to perform gap filling.
-There are generally three ways for model fit in S-CCD (also see Lesson
-5): (1) Directly summing up of all state components; (2) Applying lasso
-regression using all observations within a segment
-(<code class="docutils literal notranslate"><span class="pre">fitting_coefs=True</span></code>); (3) Using the time-specific harmonic model
-coefficients at the last observation filtered by Kalman filter
-(<code class="docutils literal notranslate"><span class="pre">fitting_coefs=False</span></code>);</p>
+<p>We use the S-CCD model fit to perform gap filling. Compared with a
+single global fit, S-CCD first identifies temporal breaks and then fits
+the time series segment by segment, which generally leads to a smaller
+RMSE than one-time fitting. There are three common configurations for
+model fitting in S-CCD (see Lesson 5 for details): (1) directly summing
+up of all state components; (2) applying lasso regression using all
+observations within a segment (<code class="docutils literal notranslate"><span class="pre">fitting_coefs=True</span></code>); (3) using the
+time-specific harmonic model coefficients at the last observation
+filtered by Kalman filter (<code class="docutils literal notranslate"><span class="pre">fitting_coefs=False</span></code>);</p>
 <p>For gap filling, we recommended using the first approach, i.e., summing
 up all the state components, to pursue the best fitting that accounts
 for the local fluctuations. We need to output S-CCD states by setting
 <code class="docutils literal notranslate"><span class="pre">state_intervaldays</span></code> to perform the best gap filling.</p>
 <hr class="docutils" />
-<section id="read-and-plot-the-daily-soil-moisture-dataset">
-<h2>Read and plot the daily soil moisture dataset<a class="headerlink" href="#read-and-plot-the-daily-soil-moisture-dataset" title="Link to this heading">¶</a></h2>
-<style>
-/* 覆盖样式 */
-.output-block .highlight {
-    background: transparent !important;
-    margin-bottom: 0 !important;
-}
-.output-block .highlight pre {
-    background-color: #f0f4ff !important;
-    padding: 0.8em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-}
-/* 添加底部间距 */
-.output-block {
-    margin-bottom: 1.5em !important;
-}
-</style><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<section id="daily-soil-moisture-dataset">
+<h2>Daily soil moisture dataset<a class="headerlink" href="#daily-soil-moisture-dataset" title="Link to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
@@ -179,8 +166,8 @@ for the local fluctuations. We need to output S-CCD states by setting
 </div>
 <img alt="_images/8_gapfilling_general_FY3B_1_0.png" src="_images/8_gapfilling_general_FY3B_1_0.png" />
 </section>
-<section id="gap-filling-using-s-ccd">
-<h2>gap filling using S-CCD<a class="headerlink" href="#gap-filling-using-s-ccd" title="Link to this heading">¶</a></h2>
+<section id="gap-filling-for-sampled-time-series">
+<h2>Gap filling for sampled time series<a class="headerlink" href="#gap-filling-for-sampled-time-series" title="Link to this heading">¶</a></h2>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
@@ -516,7 +503,23 @@ for the local fluctuations. We need to output S-CCD states by setting
 <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;TCN vs S-CCD fitting&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;TCN vs S-CCD fitting&#39;)
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>Text(0.5, 1.0, &#39;TCN vs S-CCD fitting&#39;)
 </pre></div>
 </div>
 <img alt="_images/8_gapfilling_general_FY3B_3_1.png" src="_images/8_gapfilling_general_FY3B_3_1.png" />
@@ -603,8 +606,9 @@ stable</p>
 <img alt="_images/8_gapfilling_general_FY3B_5_1.png" src="_images/8_gapfilling_general_FY3B_5_1.png" />
 <p>From the above results, when we increased sampling rate from 0.3 to 0.7,
 the fitting curves of S-CCD (yellow ones) shows only slightly different
-gap filling results. (such as <code class="docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">rate=0.3</span></code> achieves lower value
-for the first peak in 2014)</p>
+gap filling results (such as <code class="docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">rate=0.3</span></code> achieves lower value
+for the first peak in 2014), which suggested the performance of gap
+filling is generally robust at different sampling rates.</p>
 </section>
 </section>
 
@@ -612,8 +616,8 @@ for the first peak in 2014)</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="7_near_realtime_logging_hls.html" class="btn btn-neutral float-left" title="Lesson 7: near real-time monitoring for forest disturbances" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tutorial_ch.html" class="btn btn-neutral float-right" title="Pyxccd指南(Chinese)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="7_near_realtime_logging_hls.html" class="btn btn-neutral float-left" title="Lesson 7: near real-time monitoring" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_ch.html" class="btn btn-neutral float-right" title="Pyxccd指南 (Chinese)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

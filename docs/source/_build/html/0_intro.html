@@ -17,7 +17,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Lesson 1: detecting disturbances using COLD and S-CCD" href="1_break_detection_fire_hls.html" />
+    <link rel="prev" title="Pyxccd Tutorial (English)" href="tutorial_en.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,11 +41,26 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Lesson 0: introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preparation">Preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#learning-pyxccd-with-examples">Learning Pyxccd with Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning&precipitation_coarse.html">Lesson 5: state analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
 </ul>
 
@@ -61,6 +78,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
       <li class="breadcrumb-item active">Lesson 0: introduction</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/0_intro.rst.txt" rel="nofollow"> View page source</a>
@@ -80,7 +98,7 @@ time-series datasets.</p>
 <p>Special thanks to Tianjia Chu, Ronghua Liao, Yingchu Hu, and Yulin Jiang
 for preparing tutorial datasets.</p>
 <section id="preparation">
-<h2>Preparation:<a class="headerlink" href="#preparation" title="Link to this heading">¶</a></h2>
+<h2>Preparation<a class="headerlink" href="#preparation" title="Link to this heading">¶</a></h2>
 <p>First, please install <code class="docutils literal notranslate"><span class="pre">pyxccd</span></code>. In a Jupyter notebook cell, run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pyxccd</span>
 </pre></div>
@@ -99,10 +117,10 @@ in the devel branch, unzipped it, and under the directory
 </div>
 </section>
 <section id="learning-pyxccd-with-examples">
-<h2>Learning Pyxccd with Examples:<a class="headerlink" href="#learning-pyxccd-with-examples" title="Link to this heading">¶</a></h2>
+<h2>Learning Pyxccd with Examples<a class="headerlink" href="#learning-pyxccd-with-examples" title="Link to this heading">¶</a></h2>
 <p>To illustrate the utilities of pyxccd, we prepared multiple notebook
-examples using diversified multivariate satellite-based time series
-across a wide range of applications in this tutorial:</p>
+examples using multivariate satellite-based time series across a wide
+range of applications in this tutorial:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>No.</p></th>
@@ -224,12 +242,13 @@ China</p></td>
 <li><p>The tutorial primarily provides pixel-based time series examples for
 educational purposes; however, in practical applications, analyses
 are typically performed on image-based datasets. In Lesson 4, we
-specifically demonstrate the procedures for applying pyxccd to real
-image-based datasets;</p></li>
+will specifically demonstrate the procedures for applying pyxccd to
+real-world image-based time series;</p></li>
 <li><p>All date columns in the tutorial are formatted as Gregorian
 proleptic ordinal numbers, representing the number of days elapsed
-since 0001-01-01. Users can convert these values to standard date
-formats using the Python function <code class="docutils literal notranslate"><span class="pre">datetime.date.fromordinal()</span></code>.</p></li>
+since 0001-01-01. Users can convert the ordinal date format to
+human-readable date format using the Python function
+<code class="docutils literal notranslate"><span class="pre">datetime.date.fromordinal()</span></code>.</p></li>
 </ol>
 </section>
 </section>
@@ -237,7 +256,10 @@ formats using the Python function <code class="docutils literal notranslate"><sp
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_en.html" class="btn btn-neutral float-left" title="Pyxccd Tutorial (English)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="1_break_detection_fire_hls.html" class="btn btn-neutral float-right" title="Lesson 1: detecting disturbances using COLD and S-CCD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

@@ -1,5 +1,5 @@
-Lesson 8: gap filling
-=====================
+Lesson 8: break-aware gap filling
+=================================
 
 **Author: Su Ye (remotesensingsuy@gmail.com)**
 
@@ -30,13 +30,15 @@ X. (2025). A TCN-Transformer Parallel model for reconstruction of a
 global, daily, spatially seamless FY-3B soil moisture dataset. Remote
 Sensing of Environment, 328, 114841.*
 
-**S-CCD model fit** We will use S-CCD model fit to perform gap filling.
-There are generally three ways for model fit in S-CCD (also see Lesson
-5): (1) Directly summing up of all state components; (2) Applying lasso
-regression using all observations within a segment
-(``fitting_coefs=True``); (3) Using the time-specific harmonic model
-coefficients at the last observation filtered by Kalman filter
-(``fitting_coefs=False``);
+We use the S-CCD model fit to perform gap filling. Compared with a
+single global fit, S-CCD first identifies temporal breaks and then fits
+the time series segment by segment, which generally leads to a smaller
+RMSE than one-time fitting. There are three common configurations for
+model fitting in S-CCD (see Lesson 5 for details): (1) directly summing
+up of all state components; (2) applying lasso regression using all
+observations within a segment (``fitting_coefs=True``); (3) using the
+time-specific harmonic model coefficients at the last observation
+filtered by Kalman filter (``fitting_coefs=False``);
 
 For gap filling, we recommended using the first approach, i.e., summing
 up all the state components, to pursue the best fitting that accounts
@@ -45,28 +47,8 @@ for the local fluctuations. We need to output S-CCD states by setting
 
 --------------
 
-Read and plot the daily soil moisture dataset
----------------------------------------------
-
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
+Daily soil moisture dataset
+---------------------------
 
 .. code:: ipython3
 
@@ -107,8 +89,8 @@ Read and plot the daily soil moisture dataset
 .. image:: 8_gapfilling_general_FY3B_files/8_gapfilling_general_FY3B_1_0.png
 
 
-gap filling using S-CCD
------------------------
+Gap filling for sampled time series
+-----------------------------------
 
 .. code:: ipython3
 
@@ -449,6 +431,26 @@ gap filling using S-CCD
 
 
 
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
+
 .. code:: text
     :class: output-block
 
@@ -557,5 +559,6 @@ stable
 
 From the above results, when we increased sampling rate from 0.3 to 0.7,
 the fitting curves of S-CCD (yellow ones) shows only slightly different
-gap filling results. (such as ``sampling rate=0.3`` achieves lower value
-for the first peak in 2014)
+gap filling results (such as ``sampling rate=0.3`` achieves lower value
+for the first peak in 2014), which suggested the performance of gap
+filling is generally robust at different sampling rates.

@@ -56,7 +56,6 @@ Fire:
 .. code:: ipython3
 
     import numpy as np
-    import os
     import pathlib
     import pandas as pd
     
@@ -81,6 +80,26 @@ Fire:
     print("COLD results is: ")
     print(cold_result)
 
+
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
 
 .. code:: text
     :class: output-block
@@ -161,26 +180,7 @@ Pyxccd provides this function for determining the break category:
     from pyxccd.utils import getcategory_cold
     print(f"The category for the first break is {getcategory_cold(cold_result, 0)}") # 0 means the first break, 1 means the second, etc
 
-.. raw:: html
 
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
-    
 .. code:: text
     :class: output-block
 
@@ -527,43 +527,17 @@ S-CCD and COLD both detects the disturbance as ‘2024-03-23’. Actually, I
 have tested lots of cases. S-CCD and COLD often yielded very similar
 break detection results for retrospective analysis.
 
-The output of S-CCD is a structured object containing six elements.
-
-+-----------------------+-----------------------+-----------------------+
-| Element               | Datatype              | Description           |
-+=======================+=======================+=======================+
-| position              | int                   | Position of current   |
-|                       |                       | pixel, commonly coded |
-|                       |                       | as 10000*row+col      |
-+-----------------------+-----------------------+-----------------------+
-| rec_cg                | ndarray               | Temporal segment      |
-|                       |                       | obtained by           |
-|                       |                       | retrospective break   |
-|                       |                       | detection             |
-+-----------------------+-----------------------+-----------------------+
-| nrt_mode              | int                   | Current mode: the 1st |
-|                       |                       | digit indicate        |
-|                       |                       | predictability and    |
-|                       |                       | the 2nd is for        |
-|                       |                       | ``nrt_model``         |
-|                       |                       | availability          |
-+-----------------------+-----------------------+-----------------------+
-| nrt_model             | ndarray               | Near real-time model  |
-|                       |                       | for the last segment, |
-|                       |                       | which will be         |
-|                       |                       | recursively updated   |
-+-----------------------+-----------------------+-----------------------+
-| nrt_queue             | ndarray               | Near real-time        |
-|                       |                       | observations stored   |
-|                       |                       | in a queue when       |
-|                       |                       | ``nrt_model`` is not  |
-|                       |                       | initialized           |
-+-----------------------+-----------------------+-----------------------+
-| min_rmse              | ndarray               | Minimum rmse in CCDC  |
-|                       |                       | to avoid              |
-|                       |                       | overdetection from    |
-|                       |                       | black body            |
-+-----------------------+-----------------------+-----------------------+
+The output of S-CCD is a structured object containing six elements. \|
+Element \| Datatype \| Description \| \| :——- \| :——: \| ——-: \| \|
+position \| int \| Position of current pixel, commonly coded as
+10000*row+col \| \| rec_cg \| ndarray \| Temporal segment obtained by
+retrospective break detection \| \| nrt_mode \| int \| Current mode: the
+1st digit indicate predictability and the 2nd is for ``nrt_model``
+availability \| \| nrt_model \| ndarray \| Near real-time model for the
+last segment, which will be recursively updated\| \| nrt_queue \|
+ndarray \| Near real-time observations stored in a queue when
+``nrt_model`` is not initialized \| \| min_rmse \| ndarray \| Minimum
+rmse in CCDC to avoid overdetection from black body \|
 
 Among them, ``rec_cg`` stores the results of historical segments
 identified through break detection. A key distinction from the COLD
@@ -593,8 +567,7 @@ The details for using S-CCD for the NRT scenario will be seen in Lesson
 7. For this lesson, we will focus on the S-CCD-based retrospective
 analysis.
 
-S-CCD visualization
-~~~~~~~~~~~~~~~~~~~
+### S-CCD visualization
 
 .. code:: ipython3
 

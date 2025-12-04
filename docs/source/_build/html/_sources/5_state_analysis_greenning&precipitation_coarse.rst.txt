@@ -1,4 +1,4 @@
-Lesson 5: State analysis
+Lesson 5: state analysis
 ========================
 
 **Author: Su Ye (remotesensingsuy@gmail.com)**
@@ -52,28 +52,8 @@ Environment, 252, 112167.*
 
 --------------
 
-Greenness trend in Tibet (MODIS)
---------------------------------
-
-.. raw:: html
-
-    <style>
-    /* 覆盖样式 */
-    .output-block .highlight {
-        background: transparent !important;
-        margin-bottom: 0 !important;
-    }
-    .output-block .highlight pre {
-        background-color: #f0f4ff !important;
-        padding: 0.8em !important;
-        margin: 0 !important;          
-        border-radius: 0 !important;
-    }
-    /* 添加底部间距 */
-    .output-block {
-        margin-bottom: 1.5em !important;  
-    }
-    </style>
+Greenning trend analysis
+------------------------
 
 .. code:: ipython3
 
@@ -106,8 +86,29 @@ Greenness trend in Tibet (MODIS)
     print(sccd_detect_flex(dates, ndvi, qas, lam=20, state_intervaldays=1))
 
 
+.. raw:: html
+
+    <style>
+    /* 覆盖样式 */
+    .output-block .highlight {
+        background: transparent !important;
+        margin-bottom: 0 !important;
+    }
+    .output-block .highlight pre {
+        background-color: #f0f4ff !important;
+        padding: 0.8em !important;
+        margin: 0 !important;          
+        border-radius: 0 !important;
+    }
+    /* 添加底部间距 */
+    .output-block {
+        margin-bottom: 1.5em !important;  
+    }
+    </style>
+
 .. code:: text
     :class: output-block
+
 
     ---------------------------------------------------------------------------
 
@@ -609,27 +610,33 @@ measurements.
 S-CCD model fit
 ---------------
 
-S-CCD provides three approaches for model fitting: (1) directly summing
-all state components; (2) applying LASSO regression using all
-observations within a segment (``fitting_coefs=True``); and (3) adopting
-time-specific harmonic model coefficients estimated at the last model
-through the Kalman filter (``fitting_coefs=False``).
+Traditionally, curve fitting does not account for temporal breaks, which
+can degrade model performance. S-CCD addresses this limitation by
+providing three approaches for break-aware model fitting:
 
-In general, summing all states (the first approach) offers the most
-effective means of capturing local fluctuations in the time series and
-therefore yields the lowest RMSE. Applying LASSO regression (the second
-approach) corresponds to the coefficient-generation strategy used in the
+(1) directly summing all state components;
+
+(2) applying LASSO regression using all observations within a segment
+    (``fitting_coefs=True``);
+
+(3) adopting time-specific harmonic model coefficients estimated at the
+    last model through the Kalman filter (``fitting_coefs=False``).
+
+In general, summing all states (Approach 1) offers the most effective
+means of capturing local fluctuations in the time series and therefore
+yields the lowest RMSE. Applying LASSO regression (Approach 2)
+corresponds to the coefficient-generation strategy used in the
 traditional CCDC algorithm and provides the best generalization
 capability, as it outputs only eight coefficients that can serve as
 shape parameters for machine learning inputs. Using time-specific
-harmonic model coefficients (the third approach) reflects model behavior
-only at the most recent observations and may lead to underfitting for
-earlier portions of the time series. This approach is particularly
-suitable for near-real-time monitoring applications, where the primary
-focus is on detecting and characterizing recent disturbances.
+harmonic model coefficients (Approach 3) reflects model behavior only at
+the most recent observations and may lead to underfitting in earlier
+portions of the time series. This approach is particularly suitable for
+near-real-time monitoring applications, where the primary focus is on
+detecting and characterizing recent disturbances.
 
-The below are the examples for fitting comparison using the
-precipitation datasets:
+The below are the examples for comparing different fitting approaches
+using the precipitation datasets:
 
 .. code:: ipython3
 

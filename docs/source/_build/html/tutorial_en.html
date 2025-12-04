@@ -47,13 +47,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pyxccd Tutorial (English)</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: state analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html">Lesson 6: anomalies vs breaks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
@@ -89,8 +89,8 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="0_intro.html">Lesson 0: introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="0_intro.html#preparation">Preparation:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="0_intro.html#learning-pyxccd-with-examples">Learning Pyxccd with Examples:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html#preparation">Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="0_intro.html#learning-pyxccd-with-examples">Learning Pyxccd with Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="1_break_detection_fire_hls.html">Lesson 1: detecting disturbances using COLD and S-CCD</a><ul>
@@ -98,30 +98,30 @@
 <li class="toctree-l2"><a class="reference internal" href="1_break_detection_fire_hls.html#s-ccd">S-CCD</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: Parameter selection for S-CCD</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#probability-of-change-p-cg">Probability of Change (p_cg)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#conse">Conse</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#conclusion">Conclusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_parameter_selection_insect_landsat.html">Lesson 2: parameter specification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#probability-of-change">Probability of Change</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#number-of-consecutive-observations">Number of consecutive observations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_parameter_selection_insect_landsat.html#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible inputs</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#allowing-for-inputs-from-any-sensor">Allowing for inputs from any sensor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html">Lesson 3: flexible mode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#inputs-from-sensors-other-than-landsat">Inputs from sensors other than Landsat</a></li>
 <li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#trimodal-s-ccd">Trimodal S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#incoporating-evi-into-s-ccd-cold">Incoporating EVI into S-CCD/COLD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#incoporating-vegetation-indices">Incoporating vegetation indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_flexible_inputs_crop_sentinel2.html#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4:detailed steps for detecting disturbance studies using HLS datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#preparation">Preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-1-image-stack-processing">Step 1: Image Stack Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-2-change-detection-sccd-cold">Step 2: Change Detection (SCCD &amp; COLD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-3-disturbance-map-generation">Step 3: Disturbance Map Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#important-notes">Important Notes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#example-output">Example Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4_tile_processing_general_hls.html">Lesson 4: tile-based processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-0-preparation">Step 0: preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-1-image-preprocessing">Step 1: image preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-2-break-detection">Step 2: break detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#step-3-disturbance-map-generation">Step 3: disturbance map generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_tile_processing_general_hls.html#result-examples">Result examples</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: State analysis</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#greenness-trend-in-tibet-modis">Greenness trend in Tibet (MODIS)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html">Lesson 5: state analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#greenning-trend-analysis">Greenning trend analysis</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#precipitation-seasonality">Precipitation seasonality</a></li>
 <li class="toctree-l2"><a class="reference internal" href="5_state_analysis_greenning%26precipitation_coarse.html#s-ccd-model-fit">S-CCD model fit</a></li>
 </ul>
@@ -132,16 +132,15 @@
 <li class="toctree-l2"><a class="reference internal" href="6_anomalies_break_drought_gosif.html#solution-anomaly-break-detection-hierachy">Solution: “anomaly-break” detection hierachy</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring for forest disturbances</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#s-ccd">S-CCD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#historical-data-processing">Historical data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="7_near_realtime_logging_hls.html">Lesson 7: near real-time monitoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#retrospective-data-processing">Retrospective data processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#bi-weekly-recursive-update">Bi-weekly recursive update</a></li>
 <li class="toctree-l2"><a class="reference internal" href="7_near_realtime_logging_hls.html#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: gap filling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#read-and-plot-the-daily-soil-moisture-dataset">Read and plot the daily soil moisture dataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#gap-filling-using-s-ccd">gap filling using S-CCD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="8_gapfilling_general_FY3B.html">Lesson 8: break-aware gap filling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#daily-soil-moisture-dataset">Daily soil moisture dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#gap-filling-for-sampled-time-series">Gap filling for sampled time series</a></li>
 <li class="toctree-l2"><a class="reference internal" href="8_gapfilling_general_FY3B.html#trying-different-temporal-density">Trying different temporal density</a></li>
 </ul>
 </li>

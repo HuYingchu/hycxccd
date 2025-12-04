@@ -10,8 +10,8 @@ time-series datasets.
 Special thanks to Tianjia Chu, Ronghua Liao, Yingchu Hu, and Yulin Jiang
 for preparing tutorial datasets.
 
-Preparation:
-------------
+Preparation
+-----------
 
 First, please install ``pyxccd``. In a Jupyter notebook cell, run:
 
@@ -35,12 +35,12 @@ in the devel branch, unzipped it, and under the directory
    └── notebooks
    └── datasets
 
-Learning Pyxccd with Examples:
-------------------------------
+Learning Pyxccd with Examples
+-----------------------------
 
 To illustrate the utilities of pyxccd, we prepared multiple notebook
-examples using diversified multivariate satellite-based time series
-across a wide range of applications in this tutorial:
+examples using multivariate satellite-based time series across a wide
+range of applications in this tutorial:
 
 +---------+------------+---------------+------------+------------+------------+---------+
 | No.     | Topics     | Applications  | Location   | Time       | Resolution | Density |
@@ -82,10 +82,11 @@ Note:
 (1) The tutorial primarily provides pixel-based time series examples for
     educational purposes; however, in practical applications, analyses
     are typically performed on image-based datasets. In Lesson 4, we
-    specifically demonstrate the procedures for applying pyxccd to real
-    image-based datasets;
+    will specifically demonstrate the procedures for applying pyxccd to
+    real-world image-based time series;
 
 (2) All date columns in the tutorial are formatted as Gregorian
     proleptic ordinal numbers, representing the number of days elapsed
-    since 0001-01-01. Users can convert these values to standard date
-    formats using the Python function ``datetime.date.fromordinal()``.
+    since 0001-01-01. Users can convert the ordinal date format to
+    human-readable date format using the Python function
+    ``datetime.date.fromordinal()``.
