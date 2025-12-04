@@ -532,16 +532,25 @@ vegetation indices can enhance the results.
 Inputting vegetation indices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The sentinel-2 MSI covering 13 spectral bands, which are denoted as: \|
-Sentinel-2 Bands\| Central Wavelength \| Resolution (m) \| \| :——- \|
-:——: \| ——-: \| \| Band 1 - Coastal aerosol \| 0.443 \| 60 \| \| Band 2
-- Blue \| 0.490 \| 10 \| \| Band 3 - Green \| 0.560 \| 10 \| \| Band 4 -
-Red \| 0.665 \| 10 \| \| Band 5 - Red Edge \| 0.705 \| 20 \| \| Band 6 -
-Red Edge \| 0.740 \| 20 \| \| Band 7 - Red Edge \| 0.783 \| 20 \| \|
-Band 8 - NIR \| 0.842 \| 10 \| \| Band 8A - Red Edge \| 0.865 \| 20 \|
-\| Band 9 - Water vapour \| 0.945 \| 60 \| \| Band 10 - SWIR-Cirrus \|
-1.375 \| 60 \| \| Band 11 - SWIR \| 1.610 \| 20 \| \| Band 12 - SWIR \|
-2.190 \| 20 \|
+The sentinel-2 MSI covering 13 spectral bands, which are denoted as: 
+
+======================== ================== ==============
+Sentinel-2 Bands         Central Wavelength Resolution (m)
+======================== ================== ==============
+Band 1 - Coastal aerosol 0.443              60
+Band 2 - Blue            0.490              10
+Band 3 - Green           0.560              10
+Band 4 - Red             0.665              10
+Band 5 - Red Edge        0.705              20
+Band 6 - Red Edge        0.740              20
+Band 7 - Red Edge        0.783              20
+Band 8 - NIR             0.842              10
+Band 8A - Red Edge       0.865              20
+Band 9 - Water vapour    0.945              60
+Band 10 - SWIR-Cirrus    1.375              60
+Band 11 - SWIR           1.610              20
+Band 12 - SWIR           2.190              20
+======================== ================== ==============
 
 For agricultural monitoring, the Enhanced Vegetation Index (EVI) is
 widely used to capture crop growth dynamics and vegetation physiological

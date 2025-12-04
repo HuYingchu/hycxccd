@@ -527,17 +527,43 @@ S-CCD and COLD both detects the disturbance as ‘2024-03-23’. Actually, I
 have tested lots of cases. S-CCD and COLD often yielded very similar
 break detection results for retrospective analysis.
 
-The output of S-CCD is a structured object containing six elements. \|
-Element \| Datatype \| Description \| \| :——- \| :——: \| ——-: \| \|
-position \| int \| Position of current pixel, commonly coded as
-10000*row+col \| \| rec_cg \| ndarray \| Temporal segment obtained by
-retrospective break detection \| \| nrt_mode \| int \| Current mode: the
-1st digit indicate predictability and the 2nd is for ``nrt_model``
-availability \| \| nrt_model \| ndarray \| Near real-time model for the
-last segment, which will be recursively updated\| \| nrt_queue \|
-ndarray \| Near real-time observations stored in a queue when
-``nrt_model`` is not initialized \| \| min_rmse \| ndarray \| Minimum
-rmse in CCDC to avoid overdetection from black body \|
+The output of S-CCD is a structured object containing six elements. 
+
++-----------------------+-----------------------+-----------------------+
+| Element               | Datatype              | Description           |
++=======================+=======================+=======================+
+| position              | int                   | Position of current   |
+|                       |                       | pixel, commonly coded |
+|                       |                       | as 10000*row+col      |
++-----------------------+-----------------------+-----------------------+
+| rec_cg                | ndarray               | Temporal segment      |
+|                       |                       | obtained by           |
+|                       |                       | retrospective break   |
+|                       |                       | detection             |
++-----------------------+-----------------------+-----------------------+
+| nrt_mode              | int                   | Current mode: the 1st |
+|                       |                       | digit indicate        |
+|                       |                       | predictability and    |
+|                       |                       | the 2nd is for        |
+|                       |                       | ``nrt_model``         |
+|                       |                       | availability          |
++-----------------------+-----------------------+-----------------------+
+| nrt_model             | ndarray               | Near real-time model  |
+|                       |                       | for the last segment, |
+|                       |                       | which will be         |
+|                       |                       | recursively updated   |
++-----------------------+-----------------------+-----------------------+
+| nrt_queue             | ndarray               | Near real-time        |
+|                       |                       | observations stored   |
+|                       |                       | in a queue when       |
+|                       |                       | ``nrt_model`` is not  |
+|                       |                       | initialized           |
++-----------------------+-----------------------+-----------------------+
+| min_rmse              | ndarray               | Minimum rmse in CCDC  |
+|                       |                       | to avoid              |
+|                       |                       | overdetection from    |
+|                       |                       | black body            |
++-----------------------+-----------------------+-----------------------+
 
 Among them, ``rec_cg`` stores the results of historical segments
 identified through break detection. A key distinction from the COLD

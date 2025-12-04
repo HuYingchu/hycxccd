@@ -567,17 +567,61 @@ Stochastic continuous change detection. Remote Sensing of Environment,
 <p>S-CCD and COLD both detects the disturbance as ‘2024-03-23’. Actually, I
 have tested lots of cases. S-CCD and COLD often yielded very similar
 break detection results for retrospective analysis.</p>
-<p>The output of S-CCD is a structured object containing six elements. |
-Element | Datatype | Description | | :——- | :——: | ——-: | |
-position | int | Position of current pixel, commonly coded as
-10000*row+col | | rec_cg | ndarray | Temporal segment obtained by
-retrospective break detection | | nrt_mode | int | Current mode: the
-1st digit indicate predictability and the 2nd is for <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code>
-availability | | nrt_model | ndarray | Near real-time model for the
-last segment, which will be recursively updated| | nrt_queue |
-ndarray | Near real-time observations stored in a queue when
-<code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> is not initialized | | min_rmse | ndarray | Minimum
-rmse in CCDC to avoid overdetection from black body |</p>
+<p>The output of S-CCD is a structured object containing six elements.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Datatype</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>position</p></td>
+<td><p>int</p></td>
+<td><p>Position of current
+pixel, commonly coded
+as 10000*row+col</p></td>
+</tr>
+<tr class="row-odd"><td><p>rec_cg</p></td>
+<td><p>ndarray</p></td>
+<td><p>Temporal segment
+obtained by
+retrospective break
+detection</p></td>
+</tr>
+<tr class="row-even"><td><p>nrt_mode</p></td>
+<td><p>int</p></td>
+<td><p>Current mode: the 1st
+digit indicate
+predictability and
+the 2nd is for
+<code class="docutils literal notranslate"><span class="pre">nrt_model</span></code>
+availability</p></td>
+</tr>
+<tr class="row-odd"><td><p>nrt_model</p></td>
+<td><p>ndarray</p></td>
+<td><p>Near real-time model
+for the last segment,
+which will be
+recursively updated</p></td>
+</tr>
+<tr class="row-even"><td><p>nrt_queue</p></td>
+<td><p>ndarray</p></td>
+<td><p>Near real-time
+observations stored
+in a queue when
+<code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> is not
+initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_rmse</p></td>
+<td><p>ndarray</p></td>
+<td><p>Minimum rmse in CCDC
+to avoid
+overdetection from
+black body</p></td>
+</tr>
+</tbody>
+</table>
 <p>Among them, <code class="docutils literal notranslate"><span class="pre">rec_cg</span></code> stores the results of historical segments
 identified through break detection. A key distinction from the COLD
 algorithm lies in the handling of the last segment of <code class="docutils literal notranslate"><span class="pre">rec_cg</span></code>: in
