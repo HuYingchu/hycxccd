@@ -1,0 +1,744 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第7课：近实时监测 &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="第8课：考虑断点的数据插补" href="ch8_gapfilling_general_FY3B.html" />
+    <link rel="prev" title="第6课：异常 vs 断点" href="ch6_anomalies_break_drought_gosif.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ch0_intro.html">第0课：引言</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch1_break_detection_fire_hls.html">第1课：使用 COLD 和 S-CCD 检测干扰</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch2_parameter_selection_insect_landsat.html">第2课：参数设置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch3_flexible_inputs_crop_sentinel2.html">第3课：灵活模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch4_tile_processing_general_hls.html">第4课：基于瓦片的处理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch5_state_analysis_greenning%26precipitation_coarse.html">第5课：状态分析</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch6_anomalies_break_drought_gosif.html">第6课：异常 vs 断点</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">第7课：近实时监测</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">回顾性数据处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">双周递归更新</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">第 1-2 周：发现异常</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">第 3-4 周：检测到断点！</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">第 5-6 周：无清晰观测值</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">第 7-8 周：断点后连续收集观测值（6-&gt;8）</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">第 9-12 周：不规则间隔监测</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">总结</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ch8_gapfilling_general_FY3B.html">第8课：考虑断点的数据插补</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
+      <li class="breadcrumb-item active">第7课：近实时监测</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ch7_near_realtime_logging_hls.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>第7课：近实时监测<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<p><strong>作者: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
+<p><strong>时间序列数据集: Harmonized Landsat-Sentinel (HLS) 数据集</strong></p>
+<p><strong>应用: 中国四川的伐木活动</strong></p>
+<p><strong>随机连续变化检测（Stochastic Continuous Change Detection, S-CCD）</strong> 结合了卡尔曼滤波器，这消除了每当新数据输入时需要重新拟合整个时间序列的需求 [1]。相反，模型系数（趋势和季节参数）以短记忆的方式增量更新，因此算法不会保留整个历史记录。一旦观测值被同化（或丢弃），原始数据就不再存储。这种设计使得算法在数据连续到达的近实时应用中具有可扩展性。</p>
+<p><em>[1] Ye, S., Rogan, J., Zhu, Z., &amp; Eastman, J. R. (2021). A
+near-real-time approach for monitoring forest disturbance using Landsat
+time series: Stochastic continuous change detection. Remote Sensing of
+Environment, 252, 112167.</em></p>
+<hr class="docutils" />
+<section id="id2">
+<h2>回顾性数据处理<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>让我们使用四川的一个 HLS 示例来演示 NRT 监测伐木活动。</p>
+<p>为了启用 NRT 监测，我们需要运行 <code class="docutils literal notranslate"><span class="pre">sccd_detect</span></code> 或 <code class="docutils literal notranslate"><span class="pre">sccd_detect_flex</span></code> 来处理直到当前日期的历史时间序列数据集。假设当前日期是“2024-04-04”，我们首先需要处理从 2016 年到今天的历史 HLS 数据集：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">sccd_detect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getcategory_sccd</span><span class="p">,</span> <span class="n">defaults</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_result</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">band_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">band_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">sccd_result</span><span class="p">:</span> <span class="n">SccdOutput</span><span class="p">,</span>
+    <span class="n">axe</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;S-CCD&#39;</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare COLD and SCCD change detection algorithms by plotting their results side by side.</span>
+
+<span class="sd">    This function takes time series remote sensing data, applies both COLD and SCCD algorithms,</span>
+<span class="sd">    and visualizes the curve fitting and break detection results for comparison.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    data : np.ndarray</span>
+<span class="sd">        Input data array with shape (n_observations, n_bands + 2) where:</span>
+<span class="sd">        - First column: ordinal dates (days since January 1, AD 1)</span>
+<span class="sd">        - Next n_bands columns: spectral band values</span>
+<span class="sd">        - Last column: QA flags (0-clear, 1-water, 2-shadow, 3-snow, 4-cloud)</span>
+
+<span class="sd">    band_names : List[str]</span>
+<span class="sd">        List of band names corresponding to the spectral bands in the data (e.g., [&#39;red&#39;, &#39;nir&#39;])</span>
+
+<span class="sd">    band_index : int</span>
+<span class="sd">        1-based index of the band to plot (e.g., 0 for first band, 1 for second band)</span>
+
+<span class="sd">    sccd_result: SccdOutput</span>
+<span class="sd">        Output of sccd_detect</span>
+
+<span class="sd">    axe: Axes</span>
+<span class="sd">        An Axes object represents a single plot within that Figure</span>
+
+<span class="sd">    title: Str</span>
+<span class="sd">        The figure title. The default is &quot;S-CCD&quot;</span>
+
+<span class="sd">    plot_kwargs : Dict, optional</span>
+<span class="sd">        Additional keyword arguments to pass to the display function. Possible keys:</span>
+<span class="sd">        - &#39;marker_size&#39;: size of observation markers (default: 5)</span>
+<span class="sd">        - &#39;marker_alpha&#39;: transparency of markers (default: 0.7)</span>
+<span class="sd">        - &#39;line_color&#39;: color of model fit lines (default: &#39;orange&#39;)</span>
+<span class="sd">        - &#39;font_size&#39;: base font size (default: 14)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    Tuple[plt.Figure, List[plt.Axes]]</span>
+<span class="sd">        A tuple containing the matplotlib Figure object and a list of Axes objects</span>
+<span class="sd">        (top axis is COLD results, bottom axis is SCCD results)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+
+    <span class="c1"># Set default plot parameters</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Extract values with proper type casting</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;font_size&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+    <span class="c1"># Clean and prepare data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">band_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">])</span>
+
+
+    <span class="c1"># Plot COLD results</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+    <span class="n">slope_scale</span> <span class="o">=</span> <span class="mi">10000</span>
+
+    <span class="c1"># Prepare clean data for COLD plot</span>
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data_clean</span> <span class="o">=</span>  <span class="n">data_clean</span><span class="p">[(</span><span class="n">data_clean</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_clean</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;dates&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+
+    <span class="c1"># Calculate y-axis limits</span>
+    <span class="n">band_name</span> <span class="o">=</span> <span class="n">band_names</span><span class="p">[</span><span class="n">band_index</span><span class="p">]</span>
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_clean</span><span class="p">[</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)][</span><span class="n">band_name</span><span class="p">]</span>
+    <span class="c1"># band_values  = band_values[band_values &lt;10000]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+
+    <span class="c1"># Plot SCCD observations</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">band_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Plot SCCD segments</span>
+    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_start&#39;</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_break&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">])</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+            <span class="p">})</span>
+        <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;annual&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;semiannual&#39;</span><span class="p">]</span><span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trimodal&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert dates and plot model fit</span>
+        <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+        <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+    <span class="c1"># Plot near-real-time projection for SCCD if available</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="s1">&#39;nrt_mode&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">%</span><span class="k">10</span> == 1 or sccd_result.nrt_mode == 3 or sccd_result.nrt_mode %10 == 5):
+        <span class="n">recent_obs</span> <span class="o">=</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">][</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+            <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;t_start_since1982&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">],</span>
+            <span class="n">recent_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+            <span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">])</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+            <span class="p">})</span>
+
+        <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;annual&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;semiannual&#39;</span><span class="p">]</span><span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trimodal&#39;</span><span class="p">]</span>
+        <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+        <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">getcategory_sccd</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2"> * 10000&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Handle tick params with type safety</span>
+    <span class="n">tick_font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>  <span class="c1"># fallback</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Format spines</span>
+    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">axe</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">spine</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+    <span class="n">title_font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">font_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="mi">16</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">title_font_size</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w0.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">sensor</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># retrospective processing</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Retrospective S-CCD&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Retrospective S-CCD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_1_0.png" src="_images/7_near_realtime_logging_hls_1_0.png" />
+<p>我们可以看到在 2018 年发生了一次历史干扰，很可能是由于胁迫干扰。但由于本课是为 NRT 监测设计的，我们只关注时间序列尾部正在发生的近期干扰。</p>
+<p>如第 1 课简要介绍，<code class="docutils literal notranslate"><span class="pre">sccd_result</span></code> 是一个结构化对象，包含六个元素。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Datatype</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>position</p></td>
+<td><p>int</p></td>
+<td><p>Position of current
+pixel, commonly coded
+as 10000*row+col</p></td>
+</tr>
+<tr class="row-odd"><td><p>rec_cg</p></td>
+<td><p>ndarray</p></td>
+<td><p>Temporal segment
+obtained by
+retrospective break
+detection</p></td>
+</tr>
+<tr class="row-even"><td><p>nrt_mode</p></td>
+<td><p>int</p></td>
+<td><p>Current mode: the 1st
+digit indicate
+predictability and
+the 2nd is for
+<code class="docutils literal notranslate"><span class="pre">nrt_model</span></code>
+availability</p></td>
+</tr>
+<tr class="row-odd"><td><p>nrt_model</p></td>
+<td><p>ndarray</p></td>
+<td><p>Near real-time model
+for the last segment,
+which will be
+recursively updated</p></td>
+</tr>
+<tr class="row-even"><td><p>nrt_queue</p></td>
+<td><p>ndarray</p></td>
+<td><p>Near real-time
+observations stored
+in a queue when
+<code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> is not
+initialized</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_rmse</p></td>
+<td><p>ndarray</p></td>
+<td><p>Minimum rmse in CCDC
+to avoid
+overdetection from
+black body</p></td>
+</tr>
+</tbody>
+</table>
+<p>让我们在当前阶段打印相关的 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 信息：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sccd_result</span>
+</pre></div>
+</div>
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>SccdOutput(position=1, rec_cg=array([(735625, 736954, 60, [[ 1.48542393e+04, -1.98632324e+02, -4.02296638e+01,  2.51553841e+01, -1.45135765e+01,  9.93953896e+00], [ 8.38789941e+03, -1.07453278e+02, -8.17535400e+01,  4.86201286e+01,  1.21395941e+01, -1.15295398e+00], [ 2.46381088e+02,  9.38574553e-01, -2.61588840e+01,  7.75747833e+01, -2.77891006e+01,  1.91563301e+01], [-4.81553398e+04,  6.92187561e+02, -4.14877747e+02, -2.82666321e+01,  1.99714539e+02, -4.93824234e+01], [ 2.35799585e+03, -1.30108614e+01, -1.74128586e+02,  1.30244141e+02,  2.11633873e+01,  1.98471394e+01], [ 6.30437939e+03, -7.71522598e+01, -5.81244240e+01,  9.30946274e+01, -1.19096756e+01,  1.11940117e+01]], [ 35.270123,  43.48861 ,  45.4437  , 163.38066 ,  83.16016 ,  46.84747 ], [  15.8222275,   26.901932 ,   28.303795 , -266.93457  ,  203.08496  ,  130.46231  ])],
+      dtype={&#39;names&#39;: [&#39;t_start&#39;, &#39;t_break&#39;, &#39;num_obs&#39;, &#39;coefs&#39;, &#39;rmse&#39;, &#39;magnitude&#39;], &#39;formats&#39;: [&#39;&lt;i4&#39;, &#39;&lt;i4&#39;, &#39;&lt;i4&#39;, (&#39;&lt;f4&#39;, (6, 6)), (&#39;&lt;f4&#39;, (6,)), (&#39;&lt;f4&#39;, (6,))], &#39;offsets&#39;: [0, 4, 8, 12, 156, 180], &#39;itemsize&#39;: 204, &#39;aligned&#39;: True}), min_rmse=array([ 36,  35,  32, 135,  68,  35], dtype=int16), nrt_mode=1, nrt_model=np.void((13212, 194, [[ 208,  224,  294,  229,  248,  280,    0,    0], [ 429,  454,  497,  452,  489,  505,    0,    0], [ 404,  425,  454,  418,  423,  472,    0,    0], [2312, 2346, 2454, 2387, 2669, 2581,    0,    0], [1459, 1462, 1523, 1503, 1580, 1634,    0,    0], [ 688,  712,  715,  702,  743,  776,    0,    0]], [15212, 15217, 15219, 15222, 15227, 15232,     0,     0], [[102.346245, 0.04497578, -30.347172, 45.64486, -8.82943, 2.1275249, 0.04497578, 0.00013879126, -0.012609219, 0.018866414, -0.0034646979, 0.0018913492, -30.347172, -0.012609219, 119.790405, -5.1260967, -16.251162, 28.159357, 45.64486, 0.018866414, -5.1260967, 140.28548, -30.084187, -27.806128, -8.82943, -0.0034646979, -16.251162, -30.084187, 102.9957, 9.017389, 2.1275249, 0.0018913492, 28.159357, -27.806128, 9.017389, 120.91161], [107.10884, 0.048987884, -31.711811, 47.068657, -8.922271, 1.9123313, 0.048987884, 0.0001462898, -0.013710619, 0.020167004, -0.0035791849, 0.00196249, -31.711811, -0.013710619, 124.05986, -5.503266, -16.729149, 28.45994, 47.068657, 0.020167004, -5.503266, 144.86067, -30.926754, -28.806025, -8.922271, -0.0035791849, -16.729149, -30.926754, 106.99994, 9.354953, 1.9123313, 0.00196249, 28.45994, -28.806025, 9.354953, 124.93636], [119.9631, 0.05424634, -35.35254, 50.44321, -9.054462, 1.158471, 0.05424634, 0.00014838214, -0.014942498, 0.020941857, -0.0033436487, 0.0020050062, -35.35254, -0.014942498, 137.51291, -6.3354993, -18.420902, 29.369724, 50.44321, 0.020941857, -6.3354993, 159.0635, -33.54387, -31.973179, -9.054462, -0.0033436487, -18.420902, -33.54387, 119.844986, 10.4234495, 1.158471, 0.0020050062, 29.369724, -31.973179, 10.4234495, 137.8432], [270.5095, 0.12888381, -75.77823, 84.981155, -12.605128, -4.579196, 0.12888381, 0.00020805227, -0.02948218, 0.027392946, 0.00049356616, 0.007500413, -75.77823, -0.02948218, 265.0389, -15.28049, -37.84924, 37.26224, 84.981155, 0.027392946, -15.28049, 300.24518, -61.682697, -62.50038, -12.605128, 0.00049356616, -37.84924, -61.682697, 243.35031, 22.362244, -4.579196, 0.007500413, 37.26224, -62.50038, 22.362244, 262.02927], [201.3874, 0.0949685, -57.748226, 69.92133, -10.7411785, -2.253249, 0.0949685, 0.00018210562, -0.023727853, 0.025870612, -0.0016557443, 0.004314661, -57.748226, -0.023727853, 210.62979, -11.125076, -29.022526, 33.581055, 69.92133, 0.025870612, -11.125076, 238.27393, -48.60641, -48.75678, -10.7411785, -0.0016557443, -29.022526, -48.60641, 190.04839, 16.61674, -2.253249, 0.004314661, 33.581055, -48.75678, 16.61674, 208.46994], [130.30319, 0.060314957, -38.273083, 53.171722, -9.230985, 0.67056316, 0.060314957, 0.00015543179, -0.016456433, 0.0222466, -0.0032705672, 0.002172302, -38.273083, -0.016456433, 147.19635, -7.0093193, -19.689304, 29.95765, 53.171722, 0.0222466, -7.0093193, 169.38004, -35.444485, -34.178364, -9.230985, -0.0032705672, -19.689304, -35.444485, 129.04063, 11.181543, 0.67056316, 0.002172302, 29.95765, -34.178364, 11.181543, 147.07889]], [[4478.114, -57.458527, -51.625023, 53.003376, -3.087816, -1.4335045], [4847.253, -59.154026, -98.957275, 57.93207, 12.371733, 3.2117136], [7299.53, -94.44655, -39.032204, 108.598015, -24.481653, 3.4193916], [-107754.68, 1496.6321, -470.6851, -155.14989, 133.37932, 76.867035], [31400.36, -405.64944, -218.80751, 180.55144, -4.065642, -7.789848], [25347.256, -334.49185, -84.89389, 142.63063, -19.270958, -13.397055]], [1998.7078, 2154.9038, 2691.485, 10128.377, 6481.8506, 3107.4956], [ 226549,  217558,  310620, 5765251, 1759864,  593911], -9999, -9999, 0), dtype={&#39;names&#39;: [&#39;t_start_since1982&#39;, &#39;num_obs&#39;, &#39;obs&#39;, &#39;obs_date_since1982&#39;, &#39;covariance&#39;, &#39;nrt_coefs&#39;, &#39;H&#39;, &#39;rmse_sum&#39;, &#39;norm_cm&#39;, &#39;cm_angle&#39;, &#39;anomaly_conse&#39;], &#39;formats&#39;: [&#39;&lt;i2&#39;, &#39;&lt;i2&#39;, (&#39;&lt;i2&#39;, (6, 8)), (&#39;&lt;i2&#39;, (8,)), (&#39;&lt;f4&#39;, (6, 36)), (&#39;&lt;f4&#39;, (6, 6)), (&#39;&lt;f4&#39;, (6,)), (&#39;&lt;u4&#39;, (6,)), &#39;&lt;i2&#39;, &#39;&lt;i2&#39;, &#39;u1&#39;], &#39;offsets&#39;: [0, 2, 4, 100, 116, 980, 1124, 1148, 1172, 1174, 1176], &#39;itemsize&#39;: 1180, &#39;aligned&#39;: True}), nrt_queue=array([], dtype=float64))
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># check if the current mode is still 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># check the number of current anomlies</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current number of consecutive anomlies is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;anomaly_conse&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">recent_obs_date</span> <span class="o">=</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">][</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># check the last observation to be processed. Note that the observation date was formated the ordinal dates since the date of LANDSAT4_LAUNCH (723742) to save the date into int16. The user need to convert it to the formal date through the below code</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The date of the last observations being processed is </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">recent_obs_date</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The observation number in the current segment is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;num_obs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 1
+The current number of consecutive anomlies is 0
+The date of the last observations being processed is 2024-03-29 00:00:00
+The observation number in the current segment is 194
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">nrt_mode</span> <span class="pre">=</span> <span class="pre">1</span></code> 表示该像元**当前处于 NRT 监测阶段且具有可预测性**。<code class="docutils literal notranslate"><span class="pre">nrt_mode</span></code> 有两位数字。</p>
+<p>第一位数字：</p>
+<p>0 - 具有可预测性</p>
+<p>1 - 无可预测性</p>
+<p>第二位数字：</p>
+<p>0 - 无效模式，尚未初始化</p>
+<p>1 - 监测模式</p>
+<p>2 - 队列模式。一旦检测到断点，模式从监测模式过渡到队列模式</p>
+<p>3 - 雪的监测模式</p>
+<p>4 - 雪的队列模式</p>
+<p>5 - 从监测模式到队列模式的过渡模式（同时保留 nrt_model 和 nrt_queue），在首次检测到断点后保持 15 天</p>
+<p>一旦检测到 <code class="docutils literal notranslate"><span class="pre">anomaly</span></code>，但其变化幅度只是中小程度，则不会触发 <code class="docutils literal notranslate"><span class="pre">break</span></code>。在这种情况下，S-CCD 可能难以有效检测后续变化，即使 <code class="docutils literal notranslate"><span class="pre">sccd_result</span></code> 保留了 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code>。这种限制的出现是因为 <code class="docutils literal notranslate"><span class="pre">anomaly</span></code> 向 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 注入了额外的波动，降低了其稳定性。</p>
+<p>为了解决这个问题，S-CCD 会对每批新的观测值进行可预测性测试。该测试评估三个连续的观测值，检查它们的残差（与预测反射率的差异）是否低于阈值。<code class="docutils literal notranslate"><span class="pre">nrt_mode</span></code> 的第一位数字保持为 1，直到通过可预测性测试（然后第一位数字将变为 0）。</p>
+<p>第二位数字编码了 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 的可用性。我们分别使用 <code class="docutils literal notranslate"><span class="pre">1</span></code> 和 <code class="docutils literal notranslate"><span class="pre">3</span></code> 来表示正常情况下和雪况下 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 的可用性，使用 <code class="docutils literal notranslate"><span class="pre">2</span></code> 和 <code class="docutils literal notranslate"><span class="pre">4</span></code> 来表示缺乏 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code>，因此收集观测值直到达到 CCDC 初始化条件（即队列模式）。</p>
+</section>
+<section id="id3">
+<h2>双周递归更新<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<section id="id4">
+<h3>第 1-2 周：发现异常<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>现在，让我们以两周为步长对 <code class="docutils literal notranslate"><span class="pre">sccd_result</span></code> 进行增量更新。读取自“2024-04-04”以来的前两周观测值，并使用 <code class="docutils literal notranslate"><span class="pre">sccd_update</span></code> 更新 <code class="docutils literal notranslate"><span class="pre">sccd_result</span></code>：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">sccd_update</span>
+
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w12.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data_1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">thermals1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">,</span> <span class="n">sensor1</span> <span class="o">=</span> <span class="n">data_1</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_update</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">)</span>
+
+<span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">,</span> <span class="n">sensor_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">data_1</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 1-2)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 1-2)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current number of consecutive anomlies is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;anomaly_conse&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The observation number in the current segment is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;num_obs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 1
+The current number of consecutive anomlies is 3
+The observation number in the current segment is 197
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_6_1.png" src="_images/7_near_realtime_logging_hls_6_1.png" />
+<p>从打印的信息中，你可以看到连续异常的数量从 0 跳到了 3，表明 S-CCD 在最近两周内检测到了三个异常。这些异常对应于上述 NIR 和 SWIR2 时间序列尾部的三个明显离群点。这些异常的发生是因为，在伐木之后，地表的所有树木都被移除，导致包括 NIR 波段在内的几乎所有 Landsat 波段反射率增加（注意：伐木并不一定导致 NIR 反射率下降）。</p>
+<p>同时，当前时间段的观测计数从 194 增加到 197，证实了在此期间已有三个新的观测值被处理并纳入该时间段。这三个新观测值都被识别为光谱异常。</p>
+<p>异常检测的灵敏度可以通过 <code class="docutils literal notranslate"><span class="pre">sccd_update</span></code> 中的参数 <code class="docutils literal notranslate"><span class="pre">anomaly_pcg</span></code> 进行调整。其默认值为 0.9，对应于使用卡方分布在 90% 概率水平下的临界值。降低此阈值会使检测器更灵敏（捕捉到更弱的异常），但也会增加误报的风险。</p>
+</section>
+<section id="id5">
+<h3>第 3-4 周：检测到断点！<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w34.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data_2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">thermals1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">,</span> <span class="n">sensor1</span> <span class="o">=</span> <span class="n">data_2</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_update</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">)</span>
+
+<span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">,</span> <span class="n">sensor_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">data_1</span><span class="p">,</span> <span class="n">data_2</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 3-4)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 3-4)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current number of consecutive anamlies is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;anomaly_conse&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The observation number in the current segment is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;num_obs&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 5
+The current number of consecutive anamlies is 6
+The observation number in the current segment is 200
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_8_1.png" src="_images/7_near_realtime_logging_hls_8_1.png" />
+<p>异常数量继续从 3 增加到 6，触发了一次断点检测。nrt 模式从 <code class="docutils literal notranslate"><span class="pre">1</span></code> 变为 <code class="docutils literal notranslate"><span class="pre">5</span></code>。这里的 <code class="docutils literal notranslate"><span class="pre">5</span></code> 表示从“监测”模式过渡到“队列”模式，在此模式下，我们将同时保留 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 和 <code class="docutils literal notranslate"><span class="pre">nrt_queue</span></code> 15 天。因此，用户仍然可以从 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 进行断点分析。你可以检查（断点之后的）队列观测值：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The observation queue is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_queue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The observation queue is [([ 594,  832,  939, 3128, 3114, 1850], 15242)
+ ([ 629,  831,  924, 3027, 2836, 1637], 15243)
+ ([ 582,  790,  903, 2665, 2805, 1682], 15247)
+ ([ 538,  810, 1054, 2996, 3046, 1787], 15257)
+ ([ 747, 1026, 1270, 3644, 3740, 2197], 15259)
+ ([ 695,  948, 1261, 3026, 3333, 2099], 15262)]
+</pre></div>
+</div>
+<p>让我们快速检查断点类型（1-干扰；2-恢复）</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getcategory_sccd</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The break category (1-disturbance; 2-recovery) is </span><span class="si">{</span><span class="n">getcategory_sccd</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The recent disturbance date is </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The break category (1-disturbance; 2-recovery) is 1
+The recent disturbance date is 2024-04-08 00:00:00
+</pre></div>
+</div>
+<p>最后，我们绘制时间序列的 Landsat 影像和 4 月 15 日的 Planet 影像来确认干扰的发生：</p>
+<p><img alt="image1" src="_images/image1.png" /></p>
+<p><img alt="image2" src="_images/image2.png" /></p>
+</section>
+<section id="id6">
+<h3>第 5-6 周：无清晰观测值<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w56.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data_3</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">thermals1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">,</span> <span class="n">sensor1</span> <span class="o">=</span> <span class="n">data_3</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_update</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">)</span>
+
+<span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">,</span> <span class="n">sensor_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">data_1</span><span class="p">,</span> <span class="n">data_2</span><span class="p">,</span> <span class="n">data_3</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 5-6)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 5-6)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current number of consecutive anamlies is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;anomaly_conse&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of observation in the queue: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_queue</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The observation queue is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_queue</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 5
+The current number of consecutive anamlies is 6
+The number of observation in the queue: 6
+The observation queue is [([ 594,  832,  939, 3128, 3114, 1850], 15242)
+ ([ 629,  831,  924, 3027, 2836, 1637], 15243)
+ ([ 582,  790,  903, 2665, 2805, 1682], 15247)
+ ([ 538,  810, 1054, 2996, 3046, 1787], 15257)
+ ([ 747, 1026, 1270, 3644, 3740, 2197], 15259)
+ ([ 695,  948, 1261, 3026, 3333, 2099], 15262)]
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_15_1.png" src="_images/7_near_realtime_logging_hls_15_1.png" />
+<p>对于第 5–6 周，没有可用的清晰观测值，因此 <code class="docutils literal notranslate"><span class="pre">nrt_model</span></code> 和 <code class="docutils literal notranslate"><span class="pre">nrt_queue</span></code> 都没有更新。在 NRT 应用中，当未获取到有效观测值时，偶尔会出现这种情况。在这种情况下，监测暂时停止；然而，最近的断点信息仍然可以从 <code class="docutils literal notranslate"><span class="pre">sccd_result</span></code> 中检索。</p>
+</section>
+<section id="id7">
+<h3>第 7-8 周：断点后连续收集观测值（6-&gt;8）<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w78.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data_4</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">thermals1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">,</span> <span class="n">sensor1</span> <span class="o">=</span> <span class="n">data_4</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_update</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">)</span>
+
+<span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">,</span> <span class="n">sensor_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">data_1</span><span class="p">,</span> <span class="n">data_2</span><span class="p">,</span> <span class="n">data_3</span><span class="p">,</span> <span class="n">data_4</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 7-8)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 7-8)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current number of consecutive anamlies is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;anomaly_conse&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of observation in the queue: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_queue</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 5
+The current number of consecutive anamlies is 6
+The number of observation in the queue: 8
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_18_1.png" src="_images/7_near_realtime_logging_hls_18_1.png" />
+</section>
+<section id="id8">
+<h3>第 9-12 周：不规则间隔监测<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">S-CCD</span></code> 允许你在 NRT 场景中输入任意长度的新观测值。例如，如果监测暂停了两周，你可以通过一次运行四周的观测值来恢复监测。</p>
+<p>在本例中，请注意 <code class="docutils literal notranslate"><span class="pre">nrt_mode</span></code> 从 <code class="docutils literal notranslate"><span class="pre">5</span></code> 变为 <code class="docutils literal notranslate"><span class="pre">12</span></code>。值 <code class="docutils literal notranslate"><span class="pre">12</span></code> 表示队列模式（具有不可预测性）。从此时起，<code class="docutils literal notranslate"><span class="pre">S-CCD</span></code> 开始收集新的观测值，直到再次满足 CCDC 初始化条件。在此阶段，<code class="docutils literal notranslate"><span class="pre">nrt_queue</span></code> 存储传入的观测值，而 nrt_model 被设置为 None。</p>
+<p>过渡模式（<code class="docutils literal notranslate"><span class="pre">nrt_mode</span> <span class="pre">=</span> <span class="pre">5</span></code>）仅在切换到队列模式之前保留 15 天。</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;7_logging_hls_w910.csv&#39;</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data_5</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">thermals1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">,</span> <span class="n">sensor1</span> <span class="o">=</span> <span class="n">data_5</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_update</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">dates1</span><span class="p">,</span> <span class="n">blues1</span><span class="p">,</span> <span class="n">greens1</span><span class="p">,</span> <span class="n">reds1</span><span class="p">,</span> <span class="n">nirs1</span><span class="p">,</span> <span class="n">swir1s1</span><span class="p">,</span> <span class="n">swir2s1</span><span class="p">,</span> <span class="n">qas1</span><span class="p">)</span>
+
+<span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">,</span> <span class="n">sensor_m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">data_1</span><span class="p">,</span> <span class="n">data_2</span><span class="p">,</span> <span class="n">data_3</span><span class="p">,</span> <span class="n">data_4</span><span class="p">,</span> <span class="n">data_5</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+
+<span class="c1"># Let&#39;s plot NIR and SWIR2 time series, which are the best two disturbance indicator bands</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 9-12)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates_m</span><span class="p">,</span> <span class="n">blues_m</span><span class="p">,</span> <span class="n">greens_m</span><span class="p">,</span> <span class="n">reds_m</span><span class="p">,</span> <span class="n">nirs_m</span><span class="p">,</span> <span class="n">swir1s_m</span><span class="p">,</span> <span class="n">swir2s_m</span><span class="p">,</span> <span class="n">thermals_m</span><span class="p">,</span> <span class="n">qas_m</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;NRT S-CCD (Week 9-12)&quot;</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The current nrt mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nrt_model is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of observation in the queue: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_queue</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The current nrt mode is 12
+nrt_model is []
+The number of observation in the queue: 9
+</pre></div>
+</div>
+<img alt="_images/7_near_realtime_logging_hls_20_1.png" src="_images/7_near_realtime_logging_hls_20_1.png" />
+</section>
+</section>
+<section id="id9">
+<h2>总结<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>从上述案例中，我演示了 S-CCD 如何以递归方式检测断点。在实践中，用户可以将 <code class="docutils literal notranslate"><span class="pre">sccd_result</span></code> 本地保存，而不是存储完整的时间序列影像，这可以将数据存储需求减少约 90%，从而实现大范围处理。</p>
+<p>值得注意的是，尽管第 3–4 周的断点被六个连续异常所确认，但 <code class="docutils literal notranslate"><span class="pre">S-CCD</span></code> 早在第 1–2 周就已经开始输出异常。更先进的方法是应用机器学习技术从 nrt_model 中提取特征，这样可以在少于六个连续异常的情况下实现更早的干扰检测。详情请参阅 [2] 中提出的机器学习框架。</p>
+<p><em>[2] Ye, S., Zhu, Z., &amp; Suh, J. W. (2024). Leveraging past information
+and machine learning to accelerate land disturbance monitoring. Remote
+Sensing of Environment, 305, 114071.</em></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ch6_anomalies_break_drought_gosif.html" class="btn btn-neutral float-left" title="第6课：异常 vs 断点" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ch8_gapfilling_general_FY3B.html" class="btn btn-neutral float-right" title="第8课：考虑断点的数据插补" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

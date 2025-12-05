@@ -1,0 +1,864 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第5课：状态分析 &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">第5课：状态分析</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ch5_state_analysis_greenning&amp;precipitation_coarse.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>第5课：状态分析<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<p><strong>作者: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
+<p><strong>时间序列数据集: MODIS &amp; GPCP</strong></p>
+<p><strong>应用: 绿化和降水季节性</strong></p>
+<p>在状态空间理论中，状态是一个不可观测的（潜在的）变量，它随时间演变并支配系统的动态。我们收集的观测数据（例如，NDVI、反射率、降水）被假定为由这些隐藏状态生成，并附加噪声。形式上，基本的状态空间模型由两个方程定义：一个状态（转移）方程，描述潜在状态的时间演变；以及一个观测方程，将潜在状态与观测数据联系起来。两个方程都包含随机误差项，反映了演变过程和测量过程中的不确定性。这种随机基础是该框架被称为随机连续变化检测（S-CCD）的原因。</p>
+<div class="math notranslate nohighlight">
+\[a_{t}=Ta_{t-1} + Q\]</div>
+<div class="math notranslate nohighlight">
+\[y_{t}=Za_{t} + H\]</div>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a_{t}\)</span>: 时间 (t) 的隐藏状态</p></li>
+<li><p><span class="math notranslate nohighlight">\(T\)</span>: 转移矩阵（定义状态如何演变）</p></li>
+<li><p><span class="math notranslate nohighlight">\(Z\)</span>: 决定观测中包含项的系统矩阵</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_{t}\)</span>: 观测值</p></li>
+<li><p><span class="math notranslate nohighlight">\(Q\)</span>: 过程噪声</p></li>
+<li><p><span class="math notranslate nohighlight">\(H\)</span>: 观测噪声</p></li>
+</ul>
+<p>在 S-CCD [1] 中，状态表示为一个包含三个时间分量的向量：趋势、年际和半年际。当在灵活模式中指定 <code class="docutils literal notranslate"><span class="pre">trimodal</span></code>=True 时，会额外包含一个对应四个月周期（<code class="docutils literal notranslate"><span class="pre">trimodal</span></code>）的分量。S-CCD 支持为这些分量中的每一个输出状态。与具有固定系数的谐波回归线不同，状态包含了观测和过程噪声，因此其时间变异性能够更好地捕捉局部波动。</p>
+<p>本课展示了 <code class="docutils literal notranslate"><span class="pre">states</span></code> 在分析细微长期变化方面的一个新颖应用，这些变化往往被传统的断点检测方法所忽视。</p>
+<p><em>[1] Ye, S., Rogan, J., Zhu, Z., &amp; Eastman, J. R. (2021). A
+near-real-time approach for monitoring forest disturbance using Landsat
+time series: Stochastic continuous change detection. Remote Sensing of
+Environment, 252, 112167.</em></p>
+<hr class="docutils" />
+<section id="id2">
+<h2>绿化趋势分析<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">parser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">sccd_detect_flex</span>
+
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;5_greenning_modis.csv&#39;</span> <span class="c1"># read single-pixel MODIS time series</span>
+
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># as the original data doesn&#39;t have qa, we append qa as all zeros value (meaning they are all clear)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># force column name to &#39;date&#39; to let display_sccd_states work</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;dates&#39;</span><span class="p">})</span>
+
+<span class="c1"># convert them to ordinal dates</span>
+<span class="n">ordinal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">toordinal</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ordinal_dates</span>
+
+<span class="n">dates</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>---------------------------------------------------------------------------
+
+ValueError                                Traceback (most recent call last)
+
+Cell In[1], line 27
+     24 data.loc[:, &quot;dates&quot;] = ordinal_dates
+     26 dates, ndvi, qas = data.to_numpy().copy().T
+---&gt; 27 print(sccd_detect_flex(dates, ndvi, qas, lam=20, state_intervaldays=1))
+
+
+File c:\Users\dell\env_collect\py311_geo\Lib\site-packages\pyxccd\ccd.py:929, in sccd_detect_flex(dates, ts_stack, qas, lam, p_cg, conse, pos, b_c2, output_anomaly, anomaly_pcg, anomaly_conse, state_intervaldays, tmask_b1_index, tmask_b2_index, fitting_coefs, trimodal)
+    915 _validate_params(
+    916     func_name=&quot;sccd_detect_flex&quot;,
+    917     p_cg=p_cg,
+   (...)
+    926     trimodal=trimodal,
+    927 )
+    928 # make sure it is c contiguous array and 64 bit
+--&gt; 929 dates, ts_stack, qas = _validate_data_flex(dates, ts_stack, qas)
+    930 valid_num_scenes = ts_stack.shape[0]
+    931 nbands = ts_stack.shape[1] if ts_stack.ndim &gt; 1 else 1
+
+
+File c:\Users\dell\env_collect\py311_geo\Lib\site-packages\pyxccd\ccd.py:138, in _validate_data_flex(dates, ts_data, qas)
+    126 &quot;&quot;&quot;
+    127 validate and forcibly change the data format
+    128 Parameters
+   (...)
+    135 ----------
+    136 &quot;&quot;&quot;
+    137 check_consistent_length(dates, ts_data, qas)
+--&gt; 138 check_1d(dates, &quot;dates&quot;)
+    139 check_1d(qas, &quot;qas&quot;)
+    141 dates = dates.astype(dtype=numpy.int64, order=&quot;C&quot;)
+
+
+File c:\Users\dell\env_collect\py311_geo\Lib\site-packages\pyxccd\_param_validation.py:663, in check_1d(array, var_name)
+    654     raise ValueError(
+    655         &quot;Expected 1D array for input {}, but got {}D&quot;.format(var_name, array.ndim)
+    656     )
+    658 if (
+    659     (array.dtype != &quot;int64&quot;)
+    660     and (array.dtype != &quot;int32&quot;)
+    661     and (array.dtype != &quot;int16&quot;)
+    662 ):
+--&gt; 663     raise ValueError(
+    664         &quot;Expected int16, int32, int64 for the input, but got {}&quot;.format(array.dtype)
+    665     )
+
+
+ValueError: Expected int16, int32, int64 for the input, but got object
+</pre></div>
+</div>
+<p>哎呀，我们遇到了错误“Expected int16, int32, int64 for the input, but got object”。这是因为 NDVI 的数据类型是双精度浮点数 [-1, 1]。我们需要将其转换为整数。<strong>Pyxccd 只支持整数输入！</strong></p>
+<p>缩放确实会影响 CCDC 的结果，因为 Lasso 参数对输入值的大小敏感，这直接影响拟合精度和正则化强度之间的平衡。为了确保最佳性能和可比性，我们建议缩放浮点反射率值，使其落在或接近标准 Landsat 反射率范围 [0,10000] 内。这种调整使输入数据与 CCDC 通常校准的尺度相协调，并有助于防止模型拟合中的偏差。在这种情况下，将反射率值乘以 10,000 提供了一个合适的变换：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getcategory_sccd</span><span class="p">,</span> <span class="n">defaults</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_states_flex</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">states</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">band_name</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b0&quot;</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">states</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">states</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Trend&quot;</span><span class="p">)</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Annual cycle&quot;</span><span class="p">)</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Semi-annual cycle&quot;</span><span class="p">)</span>
+
+
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;qa&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># CCDC also processes water pixels</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>  <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trimodal&quot;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+        <span class="n">states</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]</span><span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trimodal&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">states</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span> <span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+
+
+
+<span class="n">data_copy</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Multiplying NDVI by 10000</span>
+<span class="n">data_copy</span><span class="o">.</span><span class="n">NDVI</span> <span class="o">=</span> <span class="n">data_copy</span><span class="o">.</span><span class="n">NDVI</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">dates</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">,</span>  <span class="n">qas</span> <span class="o">=</span> <span class="n">data_copy</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># Turn on the state output by setting state_intervaldays as non-zero value</span>
+<span class="n">sccd_results</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Set up plotting style</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">display_sccd_states_flex</span><span class="p">(</span><span class="n">data_df</span><span class="o">=</span><span class="n">data_copy</span><span class="p">,</span>  <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;NDVI&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;S-CCD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_3_0.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_3_0.png" />
+<p>多项研究表明，我们的地球经历了植被绿化速度的减缓 [2, 3]。我们也从 <code class="docutils literal notranslate"><span class="pre">Trend</span></code> 分量中直观地确认了相同的减缓趋势。</p>
+<p><em>[2] Feng, X., Fu, B., Zhang, Y., Pan, N., Zeng, Z., Tian, H., … &amp;
+Penuelas, J. (2021). Recent leveling off of vegetation greenness and
+primary production reveals the increasing soil water limitations on the
+greening Earth. Science Bulletin, 66(14), 1462-1471.</em></p>
+<p><em>[3] Ren, Y., Wang, H., Yang, K., Li, W., Hu, Z., Ma, Y., &amp; Qiao, S.
+(2024). Vegetation productivity slowdown on the Tibetan Plateau around
+the late 1990s. Geophysical Research Letters, 51(4), e2023GL103865.</em></p>
+<section id="id3">
+<h3>寻找转折点<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p>我将使用 <code class="docutils literal notranslate"><span class="pre">kneed</span></code> 包来自动定位这个 MODIS 像元绿化趋势开始减缓的时间点。<code class="docutils literal notranslate"><span class="pre">kneed</span></code> 包基于曲线的最大曲率找到曲线的“拐点”，即曲线从陡峭斜率变为平坦斜率的地方。</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">kneed</span><span class="w"> </span><span class="kn">import</span> <span class="n">KneeLocator</span>
+
+<span class="c1"># find the minimum NDVI trend value</span>
+<span class="n">istart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Detecting the knee between the minimum NDVI to the maximum</span>
+<span class="n">knee</span> <span class="o">=</span> <span class="n">KneeLocator</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">istart</span><span class="p">:],</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">istart</span><span class="p">:],</span>  <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;increasing&quot;</span><span class="p">)</span>
+<span class="n">xknee</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">istart</span><span class="p">:][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">knee</span><span class="o">.</span><span class="n">y_difference</span><span class="p">)]</span>
+<span class="n">yknee</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">istart</span><span class="p">:][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">knee</span><span class="o">.</span><span class="n">y_difference</span><span class="p">)]</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+
+<span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">states</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+<span class="n">states</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;colorblind&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;The turning point of greening&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">xknee</span><span class="p">)),</span> <span class="n">yknee</span> <span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;#1f77b4&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The knee date (i.e., when NDVI saturates) is </span><span class="si">{</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">xknee</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The knee NDVI  is </span><span class="si">{</span><span class="n">yknee</span><span class="o">/</span><span class="mi">10000</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The knee date (i.e., when NDVI saturates) is 2005-03-06 00:00:00
+The knee NDVI  is 0.8471548930431367
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_5_1.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_5_1.png" />
+</section>
+<section id="id4">
+<h3>总结 1<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>S-CCD 提供了一个创新的框架，用于**将基于卫星的时间序列分解为多个可解释的分量**，同时明确考虑了时间断点。通过将信号分离为趋势和季节性分量，S-CCD 能够更清晰地理解各种干扰和恢复机制下的生态系统动态。提取的趋势分量尤其具有信息性，因为它可以揭示植被或生物物理条件的细微或渐进变化，这些变化常常被强烈的季节性波动或短期噪声所掩盖。这种长期趋势变化通常源于外部驱动因素，如气候变率、人类活动或自然干扰。通过有效抑制季节性和不规则变化，S-CCD 增强了这些潜在变化的可检测性，为生态系统随时间演变的轨迹提供了更稳健和可解释的视图。</p>
+</section>
+</section>
+<section id="id5">
+<h2>降水季节性<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>年降水周期的季节性幅度是指季节性对比的强度。据报道，随着全球变暖，季节性幅度正在放大 [4]，表明最湿期和最干期之间的差异增大。但这种趋势可能是区域性的，需要仔细研究。</p>
+<p><em>[4] Wang, X., Luo, M., Song, F., Wu, S., Chen, Y. D., &amp; Zhang, W.
+(2024). Precipitation seasonality amplifies as earth warms. Geophysical
+Research Letters, 51(10), e2024GL109132.</em></p>
+<p>下面是一个示例，我们将评估北极地区一个像元的这种趋势。让我们首先快速绘制时间序列：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;5_precip_gpcp.csv&#39;</span> <span class="c1"># read the MPB-affected plot in CO</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># as the original data doesn&#39;t have qa, we append qa as all zeros value (meaning they are all clear)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+
+<span class="c1"># convert formal to ordinaldates</span>
+<span class="n">ordinal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">toordinal</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ordinal_dates</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="s2">&quot;precip&quot;</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Precip&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Date&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0, &#39;Date&#39;)
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;Figure size 640x480 with 0 Axes&gt;
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_7_2.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_7_2.png" />
+<p>从上面的示例中，我们确实看到自2019年左右以来降水季节性的幅度增加了。在北极大部分高纬度地区，降水在夏季达到峰值（主要是降雨，由于开阔水域和更活跃的水汽输送）。变暖的海洋和减少的海冰增加了大气中的水汽通量，增强了夏季降水（尤其是降雨），从而增加了季节性的幅度。让我们使用 S-CCD 状态来研究这种增加的幅度。</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;5_precip_gpcp.csv&#39;</span> <span class="c1"># read the MPB-affected plot in CO</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># as the original data doesn&#39;t have qa, we append qa as all zeros value (meaning they are all clear)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+
+<span class="c1"># convert formal to ordinaldates</span>
+<span class="n">ordinal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">toordinal</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ordinal_dates</span>
+
+<span class="c1"># scale precipitation by 1000</span>
+<span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;precip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;precip&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># force column name to &#39;date&#39; to let display_sccd_states work</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;dates&#39;</span><span class="p">})</span>
+
+<span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">display_sccd_states_flex</span><span class="p">(</span><span class="n">data_df</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;precip&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;precipitation * 1000&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_9_0.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_9_0.png" />
+<p>不幸的是，我们只观察到在时间序列末尾半年际周期幅度有微弱的增加。进一步的研究可以揭示，这种模式是由于对极端夏季降水事件的拟合不足导致的，这导致未能捕捉到增强的季节性信号。为了改进 S-CCD 对该数据集的拟合，我们将 Lambda 降低到 0：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># decrease lambda to 0</span>
+<span class="n">sccd_result</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">display_sccd_states_flex</span><span class="p">(</span><span class="n">data_df</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;precip&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;precipitation * 1000 (Lam=0)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_11_0.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_11_0.png" />
+<p>现在，在达到更好的模型拟合后，你可以看到增加的季节性幅度已分别在年际（第二个子图）和半年际（第三个子图）周期分量中被捕捉到，这是通过提高曲线对观测数据的拟合度实现的。</p>
+<p>我们可以将年际和半年际分量相加，形成一个新分量来表示一般的季节性周期，以便更好地研究：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_states_flex_adjusted</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">states</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">band_name</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b0&quot;</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">states</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">states</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Trend&quot;</span><span class="p">)</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_seasonality&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_seasonality&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_seasonality&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_seasonality&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_seasonality&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Seasonal cycle&quot;</span><span class="p">)</span>
+
+
+
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;qa&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># CCDC also processes water pixels</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>  <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trimodal&quot;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+        <span class="n">states</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]</span><span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trimodal&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">states</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span> <span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">sccd_result</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># sum up two components</span>
+<span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_seasonality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_annual&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_semiannual&#39;</span><span class="p">]</span>
+
+<span class="n">display_sccd_states_flex_adjusted</span><span class="p">(</span><span class="n">data_df</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;precip&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;precipitation * 1000 (Lam=0)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_13_0.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_13_0.png" />
+<section id="id6">
+<h3>总结 2<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>季节性强度的进一步量化可以通过计算上述步骤得出的“季节性周期”变量的最大值和最小值之间的差异来实现。与直接计算原始观测值的最大值和最小值之间的差异相比，这种方法提供了更稳定的年内变率估计。其关键优势在于 S-CCD 在拟合过程中包含了卡尔曼滤波器，它有效地平滑了时间序列，减少了噪声、异常值和不规则采样的影响。因此，估计的幅度能更好地反映潜在的季节性信号，而不是被异常的测量值所扭曲。</p>
+</section>
+</section>
+<section id="s-ccd">
+<h2>S-CCD 模型拟合<a class="headerlink" href="#s-ccd" title="Link to this heading">¶</a></h2>
+<p>传统上，曲线拟合不考虑时间断点，这可能会降低模型性能。S-CCD 通过提供三种考虑断点的模型拟合方法来解决这一限制：</p>
+<ol class="arabic simple">
+<li><p>直接求和所有状态分量；</p></li>
+<li><p>使用时间段内的所有观测值应用 LASSO 回归（<code class="docutils literal notranslate"><span class="pre">fitting_coefs=True</span></code>）；</p></li>
+<li><p>采用卡尔曼滤波器在最后一个模型中估计的时间特定谐波模型系数（<code class="docutils literal notranslate"><span class="pre">fitting_coefs=False</span></code>）。</p></li>
+</ol>
+<p>通常，求和所有状态（方法 1）是捕捉时间序列局部波动最有效的方法，因此能产生最低的均方根误差（RMSE）。应用 LASSO 回归（方法 2）对应于传统 CCDC 算法中使用的系数生成策略，并提供了最好的泛化能力，因为它只输出八个系数，可以作为机器学习输入的形状参数。使用时间特定的谐波模型系数（方法 3）仅反映最近观测值的模型行为，可能导致时间序列早期部分的拟合不足。这种方法特别适用于近实时监测应用，其首要重点是检测和表征最近的干扰。</p>
+<p>以下是比较使用降水数据集的不同拟合方法的示例：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span><span class="p">,</span> <span class="n">cold_rec_cg</span><span class="p">,</span> <span class="n">anomaly</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line2D</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_result_single</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">band_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">band_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">sccd_result</span><span class="p">:</span> <span class="n">SccdOutput</span><span class="p">,</span>
+    <span class="n">axe</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;S-CCD&#39;</span><span class="p">,</span>
+    <span class="n">states</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">trimodal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">anomaly</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="n">anomaly</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare COLD and SCCD change detection algorithms by plotting their results side by side.</span>
+
+<span class="sd">    This function takes time series remote sensing data, applies both COLD and SCCD algorithms,</span>
+<span class="sd">    and visualizes the curve fitting and break detection results for comparison.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    data : np.ndarray</span>
+<span class="sd">        Input data array with shape (n_observations, n_bands + 2) where:</span>
+<span class="sd">        - First column: ordinal dates (days since January 1, AD 1)</span>
+<span class="sd">        - Next n_bands columns: spectral band values</span>
+<span class="sd">        - Last column: QA flags (0-clear, 1-water, 2-shadow, 3-snow, 4-cloud)</span>
+
+<span class="sd">    band_names : List[str]</span>
+<span class="sd">        List of band names corresponding to the spectral bands in the data (e.g., [&#39;red&#39;, &#39;nir&#39;])</span>
+
+<span class="sd">    band_index : int</span>
+<span class="sd">        1-based index of the band to plot (e.g., 0 for first band, 1 for second band)</span>
+
+<span class="sd">    sccd_result: SccdOutput</span>
+<span class="sd">        Output of sccd_detect</span>
+
+<span class="sd">    axe: Axes</span>
+<span class="sd">        An Axes object represents a single plot within that Figure</span>
+
+<span class="sd">    title: Str</span>
+<span class="sd">        The figure title. The default is &quot;S-CCD&quot;</span>
+
+<span class="sd">    trimodal: bool</span>
+<span class="sd">        indicate whether using trimodal</span>
+
+<span class="sd">    anomaly: anomaly, optional</span>
+<span class="sd">        The anomaly detection outputs</span>
+<span class="sd">    plot_kwargs : Dict, optional</span>
+<span class="sd">        Additional keyword arguments to pass to the display function. Possible keys:</span>
+<span class="sd">        - &#39;marker_size&#39;: size of observation markers (default: 5)</span>
+<span class="sd">        - &#39;marker_alpha&#39;: transparency of markers (default: 0.7)</span>
+<span class="sd">        - &#39;line_color&#39;: color of model fit lines (default: &#39;orange&#39;)</span>
+<span class="sd">        - &#39;font_size&#39;: base font size (default: 14)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    Tuple[plt.Figure, List[plt.Axes]]</span>
+<span class="sd">        A tuple containing the matplotlib Figure object and a list of Axes objects</span>
+<span class="sd">        (top axis is COLD results, bottom axis is SCCD results)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">trimodal</span><span class="p">:</span>
+        <span class="n">n_coefs</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">n_coefs</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+
+    <span class="c1"># Set default plot parameters</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Extract values with proper type casting</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;font_size&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+    <span class="c1"># Clean and prepare data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">band_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">])</span>
+
+
+    <span class="c1"># Plot COLD results</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+    <span class="n">slope_scale</span> <span class="o">=</span> <span class="mi">10000</span>
+
+    <span class="c1"># Prepare clean data for COLD plot</span>
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data_clean</span> <span class="o">=</span>  <span class="n">data_clean</span><span class="p">[(</span><span class="n">data_clean</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_clean</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;dates&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+
+    <span class="c1"># Calculate y-axis limits</span>
+    <span class="n">band_name</span> <span class="o">=</span> <span class="n">band_names</span><span class="p">[</span><span class="n">band_index</span><span class="p">]</span>
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_clean</span><span class="p">[</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)][</span><span class="n">band_name</span><span class="p">]</span>
+    <span class="c1"># band_values  = band_values[band_values &lt;10000]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+
+    <span class="c1"># Plot SCCD observations</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">band_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Plot SCCD segments</span>
+    <span class="k">if</span> <span class="n">states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trimodal</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">states</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_annual&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_semiannual&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trimodal&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">states</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_trend&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_annual&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">states</span><span class="p">[</span><span class="s1">&#39;b0_semiannual&#39;</span><span class="p">]</span>
+        <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">states</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+        <span class="n">states</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_start&#39;</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_break&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trimodal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="p">{</span>
+                    <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                    <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                    <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+                <span class="p">})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="p">{</span>
+                    <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                    <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                    <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+                <span class="p">})</span>
+
+
+            <span class="c1"># Convert dates and plot model fit</span>
+            <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+            <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+        <span class="c1"># Plot near-real-time projection for SCCD if available</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="s1">&#39;nrt_mode&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">%</span><span class="k">10</span> == 1 or sccd_result.nrt_mode == 3 or sccd_result.nrt_mode %10 == 5):
+            <span class="n">recent_obs</span> <span class="o">=</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">][</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;t_start_since1982&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">],</span>
+                <span class="n">recent_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                <span class="mi">1</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">trimodal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="p">{</span>
+                    <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                    <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                    <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+                <span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="p">{</span>
+                    <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                    <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                    <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+                <span class="p">})</span>
+
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;annual&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;semiannual&#39;</span><span class="p">]</span><span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trimodal&#39;</span><span class="p">]</span>
+            <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+            <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+                <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+    <span class="c1"># add manual legends</span>
+    <span class="k">if</span> <span class="n">anomaly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">legend_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Disturbance break&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
+                            <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;recovery break&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">),</span>
+                            <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#EAEAF2&quot;</span><span class="p">,</span>
+                            <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;#EAEAF2&quot;</span><span class="p">,</span><span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Disturbance anomalies&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+                            <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#EAEAF2&quot;</span><span class="p">,</span>
+                            <span class="n">markerfacecolor</span><span class="o">=</span><span class="s2">&quot;#EAEAF2&quot;</span><span class="p">,</span><span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Recovery anomalies&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">legend_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Disturbance break&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">),</span>
+                    <span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;recovery break&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)]</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="o">=</span><span class="n">legend_elements</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">})</span>
+
+    <span class="c1"># plot breaks</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">)):</span>
+        <span class="c1"># we used the sign of change magnitude to decide the category of the breaks</span>
+        <span class="k">if</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;magnitude&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+
+
+    <span class="c1"># plot anomalies if available</span>
+    <span class="k">if</span> <span class="n">anomaly</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">)):</span>
+            <span class="n">pred_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">predict_ref</span><span class="p">(</span>
+                            <span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;coefs&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;obs_date_since1982&quot;</span><span class="p">][</span><span class="n">i_conse</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">],</span> <span class="n">num_coefficients</span><span class="o">=</span><span class="n">n_coefs</span>
+                        <span class="p">)</span> <span class="k">for</span> <span class="n">i_conse</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="n">cm</span> <span class="o">=</span> <span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;obs&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred_ref</span>
+
+            <span class="c1"># gpp increase is black line</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">yc</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">yc</span><span class="p">,</span><span class="s1">&#39;ro&#39;</span><span class="p">,</span><span class="n">fillstyle</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span><span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+            <span class="c1"># gpp decrease is red line</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">yc</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">anomaly</span><span class="o">.</span><span class="n">rec_cg_anomaly</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">yc</span><span class="p">,</span><span class="s1">&#39;ko&#39;</span><span class="p">,</span><span class="n">fillstyle</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span><span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Handle tick params with type safety</span>
+    <span class="n">tick_font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>  <span class="c1"># fallback</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Format spines</span>
+    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">axe</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">spine</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+    <span class="n">title_font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">font_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">else</span> <span class="mi">16</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">title_font_size</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="c1"># fitting using the state output</span>
+<span class="n">sccd_result1</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">display_sccd_result_single</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;dates&#39;</span><span class="p">,</span> <span class="s1">&#39;precip&#39;</span><span class="p">,</span> <span class="s1">&#39;qa&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;precip&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result1</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">trimodal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Fitting using states&quot;</span><span class="p">)</span>
+
+<span class="c1"># fitting using lasso regression</span>
+<span class="n">sccd_result2</span><span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fitting_coefs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">display_sccd_result_single</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;dates&#39;</span><span class="p">,</span> <span class="s1">&#39;precip&#39;</span><span class="p">,</span> <span class="s1">&#39;qa&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;precip&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result2</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">trimodal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Fitting using Lasso regression&quot;</span><span class="p">)</span>
+
+<span class="c1"># fitting using the last model cofficients from Kalman filter</span>
+<span class="n">sccd_result3</span><span class="o">=</span> <span class="n">sccd_detect_flex</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">prep</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fitting_coefs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display_sccd_result_single</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;dates&#39;</span><span class="p">,</span> <span class="s1">&#39;precip&#39;</span><span class="p">,</span> <span class="s1">&#39;qa&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;precip&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result2</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">trimodal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Fitting using the last Kalman filter model&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/5_state_analysis_greenning%26precipitation_coarse_16_0.png" src="_images/5_state_analysis_greenning%26precipitation_coarse_16_0.png" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

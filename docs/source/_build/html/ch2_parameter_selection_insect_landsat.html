@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第2课：参数设置 &mdash; pyxccd  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyxccd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/pyxccd.html">Pyxccd API reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyxccd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">第2课：参数设置</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ch2_parameter_selection_insect_landsat.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>第2课：参数设置<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<p><strong>作者: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
+<p><strong>时间序列数据集: Landsat 5,7,8 数据集</strong></p>
+<p><strong>应用: 美国科罗拉多州和马萨诸塞州的昆虫干扰</strong></p>
+<p>虽然类似 CCDC 的算法的默认参数已经过严格验证，但对于某些特定干扰类型，其性能可能并非最佳。本课程将展示不同参数设置对检测干扰的影响，从而为 COLD/S-CCD 的参数设置提供指导。</p>
+<hr class="docutils" />
+<section id="id2">
+<h2>变化概率<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>类似 CCDC 的方法中一个重要的参数是变化概率（<code class="docutils literal notranslate"><span class="pre">p_cg</span></code>）。COLD/S-CCD 通过将所有涉及光谱波段的变化幅度组合成一个范数来确定断点。从统计学上讲，变化幅度向量的范数服从卡方（chi-square）分布。参数 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 指定了用于定义该分布临界值的概率水平，从而决定了观测值必须偏离预测的 COLD/S-CCD 曲线多少才能被标记为断点的阈值。</p>
+<p>山松甲虫（Mountain Pine Beetle, MPB）的爆发在科罗拉多州的落基山脉造成了广泛的树木死亡，大约始于 2003 年，并在 2007 年达到顶峰。侵染后，受攻击的树木通常保持绿色约一年（”绿色阶段”），然后在接下来的一年内随着针叶失去叶绿素而变为红色，并最终随着落叶的发生进入灰色阶段。基于遥感的 MPB 监测面临的一个主要挑战是，初始侵染阶段的光谱变化幅度通常很细微，因为针叶大部分保持完整且仍为绿色。因此，S-CCD/COLD 中默认的干扰检测阈值（例如，<code class="docutils literal notranslate"><span class="pre">p_cg</span> <span class="pre">=</span> <span class="pre">0.99</span></code>，这是为捕捉一般性干扰事件而校准的）可能不足以灵敏地识别与甲虫活动相关的早期光谱信号。</p>
+<p>我们将使用美国科罗拉多州一个受 MPB 影响的地点的基于 Landsat 的时间序列来演示使用 S-CCD 进行干扰监测。</p>
+<section id="id3">
+<h3>默认参数<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># Imports from this package</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">sccd_detect</span>
+
+
+<span class="n">TUTORIAL_DATASET</span> <span class="o">=</span> <span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;datasets&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="c1"># modify it as you need</span>
+<span class="k">assert</span> <span class="n">TUTORIAL_DATASET</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+<span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;2_mpb_co_landsat.csv&#39;</span> <span class="c1"># read the MPB-affected plot in CO</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="c1"># split the array by the column</span>
+<span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">sensor</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.999</span><span class="p">)</span>
+
+<span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span>
+</pre></div>
+</div>
+<style>
+/* 覆盖样式 */
+.output-block .highlight {
+    background: transparent !important;
+    margin-bottom: 0 !important;
+}
+.output-block .highlight pre {
+    background-color: #f0f4ff !important;
+    padding: 0.8em !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+/* 添加底部间距 */
+.output-block {
+    margin-bottom: 1.5em !important;
+}
+</style><div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>array([], dtype=float64)
+</pre></div>
+</div>
+<p>变化记录 <code class="docutils literal notranslate"><span class="pre">rec_cg</span></code> 为空，这意味着 S-CCD 使用默认参数没有检测到任何断点。让我们深入分析使用短波红外2（SWIR2）的时间序列，这是对水分胁迫最敏感的波段：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">SccdOutput</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyxccd.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">getcategory_sccd</span><span class="p">,</span> <span class="n">defaults</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_result</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">band_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">band_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">sccd_result</span><span class="p">:</span> <span class="n">SccdOutput</span><span class="p">,</span>
+    <span class="n">axe</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;S-CCD&#39;</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare COLD and SCCD change detection algorithms by plotting their results side by side.</span>
+
+<span class="sd">    This function takes time series remote sensing data, applies both COLD and SCCD algorithms,</span>
+<span class="sd">    and visualizes the curve fitting and break detection results for comparison.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    data : np.ndarray</span>
+<span class="sd">        Input data array with shape (n_observations, n_bands + 2) where:</span>
+<span class="sd">        - First column: ordinal dates (days since January 1, AD 1)</span>
+<span class="sd">        - Next n_bands columns: spectral band values</span>
+<span class="sd">        - Last column: QA flags (0-clear, 1-water, 2-shadow, 3-snow, 4-cloud)</span>
+
+<span class="sd">    band_names : List[str]</span>
+<span class="sd">        List of band names corresponding to the spectral bands in the data (e.g., [&#39;red&#39;, &#39;nir&#39;])</span>
+
+<span class="sd">    band_index : int</span>
+<span class="sd">        1-based index of the band to plot (e.g., 0 for first band, 1 for second band)</span>
+
+<span class="sd">    sccd_result: SccdOutput</span>
+<span class="sd">        Output of sccd_detect</span>
+
+<span class="sd">    axe: Axes</span>
+<span class="sd">        An Axes object represents a single plot within that Figure</span>
+
+<span class="sd">    title: Str</span>
+<span class="sd">        The figure title. The default is &quot;S-CCD&quot;</span>
+
+<span class="sd">    plot_kwargs : Dict, optional</span>
+<span class="sd">        Additional keyword arguments to pass to the display function. Possible keys:</span>
+<span class="sd">        - &#39;marker_size&#39;: size of observation markers (default: 5)</span>
+<span class="sd">        - &#39;marker_alpha&#39;: transparency of markers (default: 0.7)</span>
+<span class="sd">        - &#39;line_color&#39;: color of model fit lines (default: &#39;orange&#39;)</span>
+<span class="sd">        - &#39;font_size&#39;: base font size (default: 14)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    Tuple[plt.Figure, List[plt.Axes]]</span>
+<span class="sd">        A tuple containing the matplotlib Figure object and a list of Axes objects</span>
+<span class="sd">        (top axis is COLD results, bottom axis is SCCD results)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+
+    <span class="c1"># Set default plot parameters</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Extract values with proper type casting</span>
+    <span class="n">font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;font_size&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">font_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">title_font_size</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+    <span class="c1"># Clean and prepare data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">band_names</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">])</span>
+
+
+    <span class="c1"># Plot COLD results</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mf">365.25</span>
+    <span class="n">slope_scale</span> <span class="o">=</span> <span class="mi">10000</span>
+
+    <span class="c1"># Prepare clean data for COLD plot</span>
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data_clean</span> <span class="o">=</span>  <span class="n">data_clean</span><span class="p">[(</span><span class="n">data_clean</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_clean</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;dates&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+
+    <span class="c1"># Calculate y-axis limits</span>
+    <span class="n">band_name</span> <span class="o">=</span> <span class="n">band_names</span><span class="p">[</span><span class="n">band_index</span><span class="p">]</span>
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_clean</span><span class="p">[</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_clean</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)][</span><span class="n">band_name</span><span class="p">]</span>
+    <span class="c1"># band_values  = band_values[band_values &lt;10000]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+
+    <span class="c1"># Plot SCCD observations</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">band_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Plot SCCD segments</span>
+    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_start&#39;</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;t_break&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">])</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">segment</span><span class="p">[</span><span class="s1">&#39;coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+            <span class="p">})</span>
+        <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;annual&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;semiannual&#39;</span><span class="p">]</span><span class="o">+</span>
+            <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trimodal&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert dates and plot model fit</span>
+        <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+        <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+    <span class="c1"># Plot near-real-time projection for SCCD if available</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sccd_result</span><span class="p">,</span> <span class="s1">&#39;nrt_mode&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span> <span class="o">%</span><span class="k">10</span> == 1 or sccd_result.nrt_mode == 3 or sccd_result.nrt_mode %10 == 5):
+        <span class="n">recent_obs</span> <span class="o">=</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">][</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;obs_date_since1982&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+            <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;t_start_since1982&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">],</span>
+            <span class="n">recent_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="o">+</span> <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;COMMON&#39;</span><span class="p">][</span><span class="s1">&#39;JULIAN_LANDSAT4_LAUNCH&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+            <span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">])</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plot_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="p">{</span>
+                <span class="s1">&#39;dates&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">slope_scale</span> <span class="o">+</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;annual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s1">&#39;semiannual&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">*</span> <span class="n">j</span><span class="p">)</span> <span class="o">*</span> <span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_model</span><span class="p">[</span><span class="s1">&#39;nrt_coefs&#39;</span><span class="p">][</span><span class="n">band_index</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s1">&#39;trimodal&#39;</span><span class="p">:</span> <span class="n">j</span> <span class="o">*</span> <span class="mi">0</span>
+            <span class="p">})</span>
+
+        <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;annual&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;semiannual&#39;</span><span class="p">]</span><span class="o">+</span> <span class="n">plot_df</span><span class="p">[</span><span class="s1">&#39;trimodal&#39;</span><span class="p">]</span>
+        <span class="n">calendar_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">plot_df</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+        <span class="n">plot_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;dates_formal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calendar_dates</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;predicted&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">plot_df</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Model fit&quot;</span><span class="p">,</span>
+            <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;line_color&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">legend_</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+
+    <span class="c1"># Plot breaks</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">getcategory_sccd</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">rec_cg</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;t_break&#39;</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2"> * 10000&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Handle tick params with type safety</span>
+    <span class="n">tick_font_size</span> <span class="o">=</span> <span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">tick_font_size</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axe</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">13</span><span class="p">)</span>  <span class="c1"># fallback</span>
+
+    <span class="n">axe</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Format spines</span>
+    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">axe</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">spine</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">title_font_size</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Standard S-CCD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/2_parameter_selection_insect_landsat_3_0.png" src="_images/2_parameter_selection_insect_landsat_3_0.png" />
+<p>从图中可以观察到短波红外波段存在上升趋势，表明水分胁迫加剧，尽管 S-CCD 没有检测到任何断点。这种上升趋势是该像元受甲虫攻击的信号。</p>
+</section>
+<section id="id4">
+<h3>信号分解<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>为了验证这个视觉上识别的趋势，我们将检查 S-CCD 提供的 <code class="docutils literal notranslate"><span class="pre">states</span></code> 工具。在状态空间模型的上下文中，状态表示时间 <span class="math notranslate nohighlight">\(t+1\)</span> 时波段 <span class="math notranslate nohighlight">\(i\)</span> 的地表信号状况，可以递归地更新时间 <span class="math notranslate nohighlight">\(t\)</span> 的滤波状态 <span class="math notranslate nohighlight">\(a_{t|t,i}\)</span>：</p>
+<div class="math notranslate nohighlight">
+\[a_{t+1,i}=Ta_{t|t,i}\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(T\)</span> 是一个转换矩阵。对于每个波段，<code class="docutils literal notranslate"><span class="pre">states</span></code> <span class="math notranslate nohighlight">\(a\)</span> 包含三个随时间变化的元素：趋势、年际、半年际和三年际（如果可用）。这些 <code class="docutils literal notranslate"><span class="pre">states</span></code> 支持对季节性、长期趋势和其他动态进行时间段内分析，从而补充了 S-CCD 检测到的光谱断点。我们将在第 5 课中详细介绍 <code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">analysis</span></code>。</p>
+<p>为了输出状态，用户只需在 <code class="docutils literal notranslate"><span class="pre">sccd_detect</span></code> 函数中将参数 <code class="docutils literal notranslate"><span class="pre">state_intervaldays</span></code> 设置为非零整数（通常设为 1，表示状态按日输出），<code class="docutils literal notranslate"><span class="pre">sccd_detect</span></code> 将生成 S-CCD 常规输出的结构化对象以及额外的状态记录：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">display_sccd_states_flex</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">states</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Axes</span><span class="p">,</span>
+    <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+    <span class="n">band_name</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b0&quot;</span><span class="p">,</span>
+    <span class="n">plot_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+    <span class="n">default_plot_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s1">&#39;marker_alpha&#39;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">14</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">plot_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">default_plot_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">states</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">states</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Trend&quot;</span><span class="p">)</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Annual cycle&quot;</span><span class="p">)</span>
+
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]))</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">extra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">extra</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Semi-annual cycle&quot;</span><span class="p">)</span>
+
+
+    <span class="n">data_clean</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;qa&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># CCDC also processes water pixels</span>
+    <span class="n">formal_dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">))</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data_clean</span><span class="p">[</span><span class="s2">&quot;dates&quot;</span><span class="p">]]</span>
+    <span class="n">data_clean</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;dates_formal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">formal_dates</span>  <span class="c1"># convert ordinal dates to calendar</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s1">&#39;dates_formal&#39;</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">,</span> <span class="s1">&#39;go&#39;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_alpha&#39;</span><span class="p">],</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data_clean</span>
+    <span class="p">)</span>
+
+    <span class="n">states</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_annual&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_trend&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">states</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">band_name</span><span class="si">}</span><span class="s2">_semiannual&quot;</span><span class="p">]</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dates_formal&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">default_plot_kwargs</span><span class="p">[</span><span class="s1">&#39;font_size&#39;</span><span class="p">])</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span> <span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">band_values</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;qa&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">][</span><span class="n">variable_name</span><span class="p">]</span>
+    <span class="n">q01</span><span class="p">,</span> <span class="n">q99</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">band_values</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">])</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="p">(</span><span class="n">q99</span> <span class="o">-</span> <span class="n">q01</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.4</span>
+    <span class="n">ylim_low</span> <span class="o">=</span> <span class="n">q01</span> <span class="o">-</span> <span class="n">extra</span>
+    <span class="n">ylim_high</span> <span class="o">=</span> <span class="n">q99</span> <span class="o">+</span> <span class="n">extra</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">ylim_low</span><span class="p">,</span> <span class="n">ylim_high</span><span class="p">))</span>
+
+
+
+<span class="c1"># Set up plotting style</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="s2">&quot;notebook&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create figure and axes</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># specify state_intervaldays as a non-zero value to output states</span>
+<span class="n">sccd_result</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">state_intervaldays</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">display_sccd_states_flex</span><span class="p">(</span><span class="n">data_df</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span><span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">band_name</span><span class="o">=</span><span class="s2">&quot;swir2&quot;</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;swir2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;S-CCD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/2_parameter_selection_insect_landsat_5_0.png" src="_images/2_parameter_selection_insect_landsat_5_0.png" />
+<p>从 <code class="docutils literal notranslate"><span class="pre">Trend</span></code> 分量（第一个子图）中，我们识别出短波红外2（SWIR2）的一个显著上升趋势，这证实了该森林像元受到了甲虫攻击。初始的抬升信号大约出现在 2007 年左右。</p>
+</section>
+<section id="p-cg">
+<h3>调整 p_cg<a class="headerlink" href="#p-cg" title="Link to this heading">¶</a></h3>
+<p>现在我们尝试通过将 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 调整为一个更低的值来检测断点。参数 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code>，代表变化的卡方概率，定义了检测断点的光谱阈值。默认情况下，<code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 设置为 0.99。在本例中，当我们将 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 降低到 0.7 时，S-CCD 能够更准确地检测到断点。</p>
+<p>值得注意的是，检测到了两个断点：第一个被 <a href="#id5"><span class="problematic" id="id6">``</span></a>getcategory_sccd``（基于规则集）自动标记为”恢复”，因此用红线标记。</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">p_cg</span><span class="o">=</span><span class="mf">0.70</span><span class="p">)</span>
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;S-CCD (p_cg=0.70)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/2_parameter_selection_insect_landsat_7_0.png" src="_images/2_parameter_selection_insect_landsat_7_0.png" />
+</section>
+</section>
+<section id="id7">
+<h2>连续观测数<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>S-CCD/COLD 的另一个重要参数是连续偏离预测值且变化幅度超过阈值的观测数量，即 <code class="docutils literal notranslate"><span class="pre">conse</span></code>。<code class="docutils literal notranslate"><span class="pre">Conse</span></code> 有时也称为 <strong>峰值窗口宽度</strong>。<code class="docutils literal notranslate"><span class="pre">conse</span></code> 的默认值为 6，意味着只有当至少连续六个观测值（一个峰值窗口）被识别为断点观测，且每个观测值引起的光谱变化幅度都大于卡方分布在概率 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 下的临界值时，才会识别一个断点。如果干扰持续时间短且很快恢复（例如干旱、洪水），那么 S-CCD 可能会因为不满足 <code class="docutils literal notranslate"><span class="pre">conse=6</span></code> 而错过断点。</p>
+<p>舞毒蛾（Spongy Moth, SM）就是这样一种短暂的食叶昆虫，原产于欧洲和亚洲，于 1869 年意外引入马萨诸塞州。在新英格兰地区，舞毒蛾的爆发是间歇性的但很严重，由气候、寄主（橡树优势度）和天敌之间的相互作用驱动。2015-2018 年的爆发突显了干旱如何使天平向昆虫种群爆发倾斜，导致大规模的森林落叶和树木死亡率升高。舞毒蛾通常在 4 月下旬孵化，6 月下旬化蛹导致落叶，这引起近红外（NIR）显著下降，但许多硬木（橡树、枫树、桦树）会在 7 月下旬或 8 月重新长叶，使其成为一种典型的短暂干扰。</p>
+<section id="nir-swir2">
+<h3>NIR 与 SWIR2 对比<a class="headerlink" href="#nir-swir2" title="Link to this heading">¶</a></h3>
+<p>让我们使用 S-CCD 的默认参数来检测美国马萨诸塞州的一个舞毒蛾点，并用 NIR 和 SWIR2 波段绘制结果：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">in_path</span> <span class="o">=</span> <span class="n">TUTORIAL_DATASET</span><span class="o">/</span> <span class="s1">&#39;2_sm_ma_landsat.csv&#39;</span> <span class="c1"># read the MPB-affected plot in CO</span>
+
+<span class="c1"># read example csv for HLS time series</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+
+<span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">sensor</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># using the default parameters</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">)</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Standard S-CCD&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Standard S-CCD&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/2_parameter_selection_insect_landsat_9_0.png" src="_images/2_parameter_selection_insect_landsat_9_0.png" />
+<p>这里有两个发现。1）我们可以观察到 2017 年夏季 NIR 的明显下降，而 SWIR2 的变化信号并不像 MPB 那样直接，这反映了树木对食叶害虫和蛀干害虫（蛀干害虫在植物木质部内部钻洞和取食）的不同生理反应。2）从时间序列可以直观地看出 2017 年存在 NIR 下降，但由于干扰持续时间太短，S-CCD 未能检测到它。</p>
+</section>
+<section id="conse">
+<h3>调整 conse<a class="headerlink" href="#conse" title="Link to this heading">¶</a></h3>
+<p>让我们调整一下 conse：</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># lowering conse to 4</span>
+<span class="n">sccd_result</span> <span class="o">=</span> <span class="n">sccd_detect</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">qas</span><span class="p">,</span> <span class="n">conse</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># plot time series and detection results</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;S-CCD (conse=4)&quot;</span><span class="p">)</span>
+
+<span class="n">display_sccd_result</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">dates</span><span class="p">,</span> <span class="n">blues</span><span class="p">,</span> <span class="n">greens</span><span class="p">,</span> <span class="n">reds</span><span class="p">,</span> <span class="n">nirs</span><span class="p">,</span> <span class="n">swir1s</span><span class="p">,</span> <span class="n">swir2s</span><span class="p">,</span> <span class="n">thermals</span><span class="p">,</span> <span class="n">qas</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">band_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blues&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;nir&#39;</span><span class="p">,</span> <span class="s1">&#39;swir1&#39;</span><span class="p">,</span> <span class="s1">&#39;swir2&#39;</span><span class="p">,</span> <span class="s1">&#39;thermals&#39;</span><span class="p">],</span> <span class="n">band_index</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sccd_result</span><span class="o">=</span><span class="n">sccd_result</span><span class="p">,</span> <span class="n">axe</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;S-CCD (conse=4)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/2_parameter_selection_insect_landsat_11_0.png" src="_images/2_parameter_selection_insect_landsat_11_0.png" />
+<p>通过将 conse 从 6 降低到 4，我们成功地检测到了由舞毒蛾侵染引起的光谱断点。值得注意的是，标准 S-CCD/COLD 基于五个光谱波段（绿、红、近红外、短波红外1、短波红外2）的组合变化幅度来识别单个断点。因此，所有五个波段共享相同的断点，即使短波红外2 波段没有表现出明显的光谱变化。</p>
+<p>在这种情况下，第二个时间段没有可用的曲线拟合，因为没有足够的观测值来初始化近实时（NRT）模型。为了验证这一点，可以检查 <code class="docutils literal notranslate"><span class="pre">nrt_mode</span></code> 的第二位：值为 2 表示模型尚未初始化，而值为 1 表示有可用的 NRT 模型。</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The second digit of nrt_mode is </span><span class="si">{</span><span class="n">sccd_result</span><span class="o">.</span><span class="n">nrt_mode</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">10</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output-block highlight-text notranslate"><div class="highlight"><pre><span></span>The second digit of nrt_mode is 2
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id8">
+<h2>总结<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>降低 <code class="docutils literal notranslate"><span class="pre">conse</span></code> 和 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code> 可以提高断点检测的灵敏度，因为需要更少的连续异常观测值或更低的变化幅度阈值来标记变化。然而，这种调整也增加了误报（虚警错误）的可能性，短期噪声或与天气相关的异常可能会被误分类为断点。因此，应仔细调整 <code class="docutils literal notranslate"><span class="pre">conse</span></code> 和 <code class="docutils literal notranslate"><span class="pre">p_cg</span></code>。当目标是捕捉细微的地表变化时，建议进行参数敏感性分析。另一个常见策略是应用更激进的参数设置以最大化灵敏度，然后使用机器学习分类器来分离感兴趣的具体变化。</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Su Ye.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

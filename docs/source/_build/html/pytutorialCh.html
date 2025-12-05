@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>第四课：利用HLS数据集进行扰动研究的详细步骤 &mdash; pyxccd  documentation</title>
+  <title>第0课：引言 &mdash; pyxccd  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css" />
@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyxccd package" href="api/pyxccd.html" />
-    <link rel="prev" title="Pyxccd指南(Chinese)" href="tutorial_ch.html" /> 
+    <link rel="prev" title="Pyxccd指南 (Chinese)" href="tutorial_ch.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,37 +44,11 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial(English)</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南(Chinese)</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">第四课：利用HLS数据集进行扰动研究的详细步骤</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">准备工作</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pyxccd">1. 安装pyxccd：</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">2. 准备HLS影像</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">3. 配置文件</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">第一步：影像堆叠处理</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id5">功能说明</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">操作步骤</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">参数说明</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">输出结果</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#sccdcold">第二步：SCCD与COLD变化检测处理</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sccd">SCCD算法</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#cold">COLD算法</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#id17">第三步：生成扰动图</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id18">功能说明</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id19">操作步骤</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id20">参数说明</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id21">输出结果</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id22">结果解读</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#id26">注意事项</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id27">示例效果</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_en.html">Pyxccd Tutorial (English)</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_ch.html">Pyxccd指南 (Chinese)</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">第0课：引言</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">准备工作</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pyxccd">通过示例学习 Pyxccd</a></li>
 </ul>
 </li>
 </ul>
@@ -96,8 +70,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="tutorial_ch.html">Pyxccd指南(Chinese)</a></li>
-      <li class="breadcrumb-item active">第四课：利用HLS数据集进行扰动研究的详细步骤</li>
+          <li class="breadcrumb-item"><a href="tutorial_ch.html">Pyxccd指南 (Chinese)</a></li>
+      <li class="breadcrumb-item active">第0课：引言</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/pytutorialCh.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -107,249 +81,159 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="hls">
-<h1>第四课：利用HLS数据集进行扰动研究的详细步骤<a class="headerlink" href="#hls" title="Link to this heading">¶</a></h1>
-<p>本教程将指导您如何使用pyxccd处理HLS影像数据，生成年度扰动图、最近扰动图和首次扰动图。整个过程分为三个主要步骤。</p>
-<section id="id1">
-<h2>准备工作<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
-<section id="pyxccd">
-<h3>1. 安装pyxccd：<a class="headerlink" href="#pyxccd" title="Link to this heading">¶</a></h3>
+  <section id="id1">
+<h1>第0课：引言<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h1>
+<p><strong>作者: Su Ye (remotesensingsuy&#64;gmail.com)</strong></p>
+<p>本教程旨在通过使用多源时间序列数据进行遥感与生态学应用的示例，演示如何使用 <code class="docutils literal notranslate"><span class="pre">pyxccd</span></code>。</p>
+<p>特别感谢 Tianjia Chu, Ronghua Liao, Yingchu Hu, 以及 Yulin Jiang 为教程准备数据集。</p>
+<section id="id2">
+<h2>准备工作<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>首先，请安装 <code class="docutils literal notranslate"><span class="pre">pyxccd</span></code>。在 Jupyter notebook 的一个单元格中运行：</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pyxccd</span>
 </pre></div>
 </div>
-</section>
-<section id="id2">
-<h3>2. 准备HLS影像<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
-<div class="line-block">
-<div class="line">准备好下载的HLS文件，确保数据按如下结构组织：（示例提供2019-2024六年的HLS数据）</div>
-<div class="line">夸克网盘下载链接：<a class="reference external" href="https://pan.quark.cn/s/f6456bf1ad27?pwd=FxtU">https://pan.quark.cn/s/f6456bf1ad27?pwd=FxtU</a></div>
-<div class="line">提取码：FxtU</div>
+<p>此外，您还需要安装可视化包：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">seaborn</span>
+</pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>HLS根目录/
-└── 瓦片ID (如51RTP)/
-    └── HLS影像文件 (如HLS.S30.T51RTP.2021001.v2.0.B02.tif)
+<p>从开发分支下载最新的 <a class="reference external" href="https://github.com/Remote-Sensing-of-Land-Resource-Lab/pyxccd">pyxccd</a> 源代码，解压后，在 <code class="docutils literal notranslate"><span class="pre">/pyxccd/tutorial</span></code> 目录下，目录结构应如下所示：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>└── notebooks
+└── datasets
 </pre></div>
 </div>
 </section>
-<section id="id3">
-<h3>3. 配置文件<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
-<p>准备配置文件config_hls.yaml，可根据需要调整config_hls.yaml中的区块大小参数（示例文件分为30×30块）：</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">DATASETINFO</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">n_rows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span>
-<span class="w">  </span><span class="nt">n_cols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span>
-<span class="w">  </span><span class="nt">n_block_x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-<span class="w">  </span><span class="nt">n_block_y</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="id4">
-<h2>第一步：影像堆叠处理<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
-<section id="id5">
-<h3>功能说明<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
-<p>将HLS影像按时间序列堆叠，为后续变化检测做准备。</p>
-</section>
-<section id="id6">
-<h3>操作步骤<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<section id="pyxccd">
+<h2>通过示例学习 Pyxccd<a class="headerlink" href="#pyxccd" title="Link to this heading">¶</a></h2>
+<p>为了展示 pyxccd 的各项功能，本教程准备了多个 notebook 示例，这些示例使用了多变量卫星时间序列数据，涵盖了广泛的应用领域：</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>No.</p></th>
+<th class="head"><p>Topics</p></th>
+<th class="head"><p>Applications</p></th>
+<th class="head"><p>Location</p></th>
+<th class="head"><p>Time
+series</p></th>
+<th class="head"><p>Resolution</p></th>
+<th class="head"><p>Density</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Break
+detection</p></td>
+<td><p>Forest fire</p></td>
+<td><p>Sichuan,
+China</p></td>
+<td><p>HLS2.0</p></td>
+<td><p>30m</p></td>
+<td><p>2-3
+days</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Parameter
+selection</p></td>
+<td><p>Forest
+Insects</p></td>
+<td><p>CO &amp; MA,
+United
+States</p></td>
+<td><p>Landsat</p></td>
+<td><p>30m</p></td>
+<td><p>8-16
+days</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Flexible
+choice for
+inputs</p></td>
+<td><p>Crop dynamics</p></td>
+<td><p>Henan,
+China</p></td>
+<td><p>Sentinel-2</p></td>
+<td><p>10m</p></td>
+<td><p>5 days</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Tile-based
+processing</p></td>
+<td><p>General
+disturbances</p></td>
+<td><p>Zhejiang,
+China</p></td>
+<td><p>HLS2.0</p></td>
+<td><p>30m</p></td>
+<td><p>2-3
+days</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>State
+analysis 1</p></td>
+<td><p>Greening</p></td>
+<td><p>Tibet,
+China</p></td>
+<td><p>MODIS</p></td>
+<td><p>500m</p></td>
+<td><p>16 days</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>State
+analysis 2</p></td>
+<td><p>Precipitation
+seasonality</p></td>
+<td><p>Arctic</p></td>
+<td><p>GPCP</p></td>
+<td><p>2.5°</p></td>
+<td><p>Monthly</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>Anomalies
+vs. breaks</p></td>
+<td><p>Agricultural
+drought</p></td>
+<td><p>Rajasthan,
+India</p></td>
+<td><p>GOSIF</p></td>
+<td><p>0.05°</p></td>
+<td><p>8 days</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p>Near
+real-time
+monitoring</p></td>
+<td><p>Forest
+logging</p></td>
+<td><p>Sichuan,
+China</p></td>
+<td><p>HLS2.0</p></td>
+<td><p>30m</p></td>
+<td><p>2-3
+days</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>Gap
+filling</p></td>
+<td><p>Soil moisture</p></td>
+<td><p>Henan,
+China</p></td>
+<td><p>FY3B</p></td>
+<td><p>25km</p></td>
+<td><p>Daily</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note:</p>
 <ol class="arabic simple">
-<li><p>确认瓦片列表文件tile_list内容为要处理的瓦片ID，若有多个则每行一个（示例文件为51RTP）。</p></li>
-<li><p>运行堆叠处理脚本step1_stack.py：</p></li>
+<li><p>The tutorial primarily provides pixel-based time series examples for
+educational purposes; however, in practical applications, analyses
+are typically performed on image-based datasets. In Lesson 4, we
+will specifically demonstrate the procedures for applying pyxccd to
+real-world image-based time series;</p></li>
+<li><p>All date columns in the tutorial are formatted as Gregorian
+proleptic ordinal numbers, representing the number of days elapsed
+since 0001-01-01. Users can convert the ordinal date format to
+human-readable date format using the Python function
+<code class="docutils literal notranslate"><span class="pre">datetime.date.fromordinal()</span></code>.</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>step1_stack.py<span class="w"> </span>--tile_list_fn<span class="w"> </span>./tile_list<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--meta_path<span class="w"> </span>/path/to/hls/data<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--yaml_path<span class="w"> </span>./config_hls.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--out_path<span class="w"> </span>/stack<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--low_date_bound<span class="w"> </span><span class="m">2019</span>-01-01<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--upp_date_bound<span class="w"> </span><span class="m">2024</span>-12-31<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--n_cores<span class="w"> </span><span class="m">16</span>
-</pre></div>
-</div>
-</section>
-<section id="id7">
-<h3>参数说明<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">tile_list_fn</span><span class="p">:</span> <span class="n">瓦片列表文件路径</span>
-<span class="o">--</span><span class="n">meta_path</span><span class="p">:</span> <span class="n">HLS数据根目录</span>
-<span class="o">--</span><span class="n">yaml_path</span><span class="p">:</span> <span class="n">配置文件路径</span>
-<span class="o">--</span><span class="n">out_path</span><span class="p">:</span> <span class="n">堆叠结果输出目录</span>
-<span class="o">--</span><span class="n">low_date_bound</span><span class="p">:</span> <span class="n">处理的时间范围下限</span><span class="p">(</span><span class="n">YYYY</span><span class="o">-</span><span class="n">MM</span><span class="o">-</span><span class="n">DD</span><span class="p">)</span>
-<span class="o">--</span><span class="n">upp_date_bound</span><span class="p">:</span> <span class="n">处理的时间范围上限</span><span class="p">(</span><span class="n">YYYY</span><span class="o">-</span><span class="n">MM</span><span class="o">-</span><span class="n">DD</span><span class="p">)</span>
-<span class="o">--</span><span class="n">n_cores</span><span class="p">:</span> <span class="n">使用的CPU核心数</span>
-</pre></div>
-</div>
-</section>
-<section id="id8">
-<h3>输出结果<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
-<p>在out_path目录（默认为stack文件夹）下会为每个瓦片生成一个{瓦片ID}_stack文件夹，包含按区块组织的堆叠数据。</p>
-</section>
-</section>
-<section id="sccdcold">
-<h2>第二步：SCCD与COLD变化检测处理<a class="headerlink" href="#sccdcold" title="Link to this heading">¶</a></h2>
-<section id="sccd">
-<h3>SCCD算法<a class="headerlink" href="#sccd" title="Link to this heading">¶</a></h3>
-<section id="id9">
-<h4>功能说明<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
-<p>使用pyxccd的SCCD算法检测每个像素的变化。</p>
-</section>
-<section id="id10">
-<h4>操作步骤<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
-<ol class="arabic simple">
-<li><p>确保已完成上一步的堆叠处理</p></li>
-<li><p>运行变化检测脚本step2_sccd.py：</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>step2_sccd.py<span class="w"> </span>--tile_list_fn<span class="w"> </span>./tile_list<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--stack_path<span class="w"> </span>/stack<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--result_parent_path<span class="w"> </span>/sccd_results<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--yaml_path<span class="w"> </span>/config_hls.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--low_datebound<span class="w"> </span><span class="m">2019</span>-01-01<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--upper_datebound<span class="w"> </span><span class="m">2024</span>-12-31<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--n_cores<span class="w"> </span><span class="m">16</span>
-</pre></div>
-</div>
-</section>
-<section id="id11">
-<h4>参数说明<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">stack_path</span><span class="p">:</span> <span class="n">上一步生成的堆叠数据目录</span>
-<span class="o">--</span><span class="n">result_parent_path</span><span class="p">:</span> <span class="n">SCCD结果输出目录</span>
-<span class="n">其他参数与第一步相同</span>
-</pre></div>
-</div>
-</section>
-<section id="id12">
-<h4>输出结果<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
-<p>在result_parent_path目录（默认为sccd_results
-文件夹）下会为每个瓦片生成一个{瓦片ID}_sccd文件夹，包含:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">record_change_x</span><span class="p">{</span><span class="n">区块X</span><span class="p">}</span><span class="n">_y</span><span class="p">{</span><span class="n">区块Y</span><span class="p">}</span><span class="n">_sccd</span><span class="o">.</span><span class="n">npy</span><span class="p">:</span> <span class="n">每个区块的变化检测结果</span>
-<span class="n">SCCD_block</span><span class="p">{</span><span class="n">区块编号</span><span class="p">}</span><span class="n">_finished</span><span class="o">.</span><span class="n">txt</span><span class="p">:</span> <span class="n">区块处理完成标记文件</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="cold">
-<h3>COLD算法<a class="headerlink" href="#cold" title="Link to this heading">¶</a></h3>
-<section id="id13">
-<h4>功能说明<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
-<p>使用pyxccd的COLD算法检测每个像素的变化。</p>
-</section>
-<section id="id14">
-<h4>操作步骤<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
-<ol class="arabic simple">
-<li><p>确保已完成上一步的堆叠处理</p></li>
-<li><p>运行变化检测脚本step2_cold.py：</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>step2_cold.py<span class="w"> </span>--tile_list_fn<span class="w"> </span>./tile_list<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--stack_path<span class="w"> </span>/stack<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--result_parent_path<span class="w"> </span>/cold_results<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--yaml_path<span class="w"> </span>./config_hls.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--low_datebound<span class="w"> </span><span class="m">2019</span>-01-01<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--upper_datebound<span class="w"> </span><span class="m">2024</span>-12-31<span class="w"> </span><span class="se">\</span>
-<span class="w">                     </span>--n_cores<span class="w"> </span><span class="m">16</span>
-</pre></div>
-</div>
-</section>
-<section id="id15">
-<h4>参数说明<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">stack_path</span><span class="p">:</span> <span class="n">上一步生成的堆叠数据目录</span>
-<span class="o">--</span><span class="n">result_parent_path</span><span class="p">:</span> <span class="n">COLD结果输出目录</span>
-<span class="n">其他参数与第一步相同</span>
-</pre></div>
-</div>
-</section>
-<section id="id16">
-<h4>输出结果<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
-<p>在result_parent_path目录（默认为cold_results
-文件夹）下会为每个瓦片生成一个{瓦片ID}_cold文件夹，包含:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">record_change_x</span><span class="p">{</span><span class="n">区块X</span><span class="p">}</span><span class="n">_y</span><span class="p">{</span><span class="n">区块Y</span><span class="p">}</span><span class="n">_cold</span><span class="o">.</span><span class="n">npy</span><span class="p">:</span> <span class="n">每个区块的变化检测结果</span>
-<span class="n">COLD_block</span><span class="p">{</span><span class="n">区块编号</span><span class="p">}</span><span class="n">_finished</span><span class="o">.</span><span class="n">txt</span><span class="p">:</span> <span class="n">区块处理完成标记文件</span>
-</pre></div>
-</div>
-</section>
-</section>
-</section>
-<section id="id17">
-<h2>第三步：生成扰动图<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
-<section id="id18">
-<h3>功能说明<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
-<p>将变化检测结果转换为年度扰动图、最近扰动图和首次扰动图。</p>
-</section>
-<section id="id19">
-<h3>操作步骤<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
-<ol class="arabic simple">
-<li><p>确保已完成前两步处理</p></li>
-<li><p>运行扰动制作脚本step3_disturbance_map.py：</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>step3_disturbance_map.py<span class="w"> </span>--source_dir<span class="w"> </span>/hls<span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--result_path<span class="w"> </span>/sccd_results/51RTP_sccd<span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--out_path<span class="w"> </span>/disturbance_maps<span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--yaml_path<span class="w"> </span>/config_hls.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--year_lowbound<span class="w"> </span><span class="m">2019</span><span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--year_uppbound<span class="w"> </span><span class="m">2024</span><span class="w"> </span><span class="se">\</span>
-<span class="w">                               </span>--n_cores<span class="w"> </span><span class="m">16</span>
-</pre></div>
-</div>
-</section>
-<section id="id20">
-<h3>参数说明<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">source_dir</span><span class="p">:</span> <span class="n">HLS数据根目录</span><span class="p">(</span><span class="n">用于获取空间参考</span><span class="p">)</span>
-<span class="o">--</span><span class="n">result_path</span><span class="p">:</span> <span class="n">第二步生成的SCCD结果目录</span><span class="p">(</span><span class="n">具体到瓦片</span><span class="p">)</span>
-<span class="o">--</span><span class="n">out_path</span><span class="p">:</span> <span class="n">扰动图输出目录</span>
-<span class="o">--</span><span class="n">year_lowbound</span><span class="p">:</span> <span class="n">起始年份</span>
-<span class="o">--</span><span class="n">year_uppbound</span><span class="p">:</span> <span class="n">结束年份</span>
-<span class="o">--</span><span class="n">n_cores</span><span class="p">:</span> <span class="n">使用的CPU核心数</span>
-</pre></div>
-</div>
-</section>
-<section id="id21">
-<h3>输出结果<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
-<p>在out_path目录（默认为disturbance_maps文件夹）下会生成以下文件:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">年份</span><span class="p">}</span><span class="n">_break_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">年度扰动图</span>
-<span class="n">recent_disturbance_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">最近扰动图</span><span class="p">(</span><span class="n">显示最近发生扰动的年份</span><span class="p">)</span>
-<span class="n">first_disturbance_map_SCCDOFFLINE</span><span class="o">.</span><span class="n">tif</span><span class="p">:</span> <span class="n">首次扰动图</span><span class="p">(</span><span class="n">显示首次发生扰动的年份</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="id22">
-<h3>结果解读<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
-<section id="id23">
-<h4>年度扰动图<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
-<div class="line-block">
-<div class="line">像元值 = 扰动类型×1000 + 年积日</div>
-<div class="line">扰动类型1表示植被扰动</div>
-<div class="line">扰动类型2表示非植被扰动</div>
-</div>
-</section>
-<section id="id24">
-<h4>最近扰动图<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
-<div class="line-block">
-<div class="line">显示每个像素最近发生扰动的年份</div>
-<div class="line">无扰动区域值为0</div>
-</div>
-</section>
-<section id="id25">
-<h4>首次扰动图<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
-<div class="line-block">
-<div class="line">显示每个像素首次发生扰动的年份</div>
-<div class="line">无扰动区域值为0</div>
-</div>
-</section>
-</section>
-</section>
-<section id="id26">
-<h2>注意事项<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple">
-<li><p>处理大型区域时，建议分批次处理瓦片，避免内存不足。</p></li>
-<li><p>可根据需要调整config_hls.yaml中的区块大小参数，平衡处理速度和内存使用。</p></li>
-<li><p>如果处理中断，可以重新运行脚本，程序会自动跳过已完成的区块。</p></li>
-</ol>
-</section>
-<section id="id27">
-<h2>示例效果<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h2>
-<p>2019-2024首次扰动图（sccd）</p>
-<figure class="align-default" id="id28">
-<img alt="First Disturbance Map" src="_images/first_disturb1.png" />
-<figcaption>
-<p><span class="caption-text">First Disturbance Map</span><a class="headerlink" href="#id28" title="Link to this image">¶</a></p>
-</figcaption>
-</figure>
 </section>
 </section>
 
@@ -357,7 +241,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tutorial_ch.html" class="btn btn-neutral float-left" title="Pyxccd指南(Chinese)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_ch.html" class="btn btn-neutral float-left" title="Pyxccd指南 (Chinese)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="api/pyxccd.html" class="btn btn-neutral float-right" title="pyxccd package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
