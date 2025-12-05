@@ -246,8 +246,15 @@ htmlhelp_basename = "pyxccddoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
-
+latex_engine = 'xelatex'
+latex_use_xindy = False
 latex_elements = {
+    'preamble': r'''
+\usepackage{xeCJK}
+\usepackage{ctex}
+\setCJKmainfont{SimSun}
+\setmainfont{Times New Roman}
+'''   
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
