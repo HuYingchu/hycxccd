@@ -1,7 +1,7 @@
 第4课：基于瓦片的处理
 ===============================
 
-**作者: Yingchu Hu, Su Ye**
+**作者: Yingchu Hu, 叶粟**
 
 **时间序列数据集: Harmonized Landsat-Sentinel (HLS) 数据集**
 
@@ -279,7 +279,7 @@ COLD:
     latest disturbance)
 
 注意事项
------
+---------
 
 1. 对于大面积区域，请分批处理瓦片以避免内存过载。
 2. 调整 config_hls.yaml 中的块大小参数以平衡处理速度和内存使用。

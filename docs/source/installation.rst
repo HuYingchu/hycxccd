@@ -2,25 +2,17 @@
 Installation
 ============
 
-Installation of the pyxsccd package is complicated by its dependency on libgdal
-and other C libraries. There are easy installations paths and an advanced
-installation path.
-
 1. Easy installation
-=================
+======================
 
 .. code-block:: console
 
-    pip install pyxsccd
-
-These wheels are mainly intended to make installation easy for simple
-applications, not so much for production. They are not tested for compatibility
-with all other binary wheels, conda packages, or QGIS.
+    pip install pyxccd
 
 Pyxccd 1.0 requires Python 3.8 or higher.
 
 2. Advanced installation
-=====================
+==========================
 The steps to install this library in development mode are consolidated
 into a single script: ``run_developer_setup.sh``.  On debian-based systems,
 this will install all of the developer requirements and ensure you are setup
